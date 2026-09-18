@@ -10,7 +10,7 @@ and length theorems. The benchmark measures the eight-word API.
 ```toml
 name = "SHA-256 / PROOF-PRESERVING NATIVE OPTIMIZATION"
 project = "."
-command = ["uv", "run", "--frozen", "python", "benchmark_sha256.py", "--gpu", "required"]
+command = ["uv", "run", "--frozen", "python", "benchmark_sha256.py", "--gpu", "off"]
 validation = ["uv", "run", "--frozen", "python", "research_validate.py"]
 metric = "best_bend_total_ms"
 direction = "min"
@@ -32,11 +32,11 @@ ignore = []
 ## Measure
 
 Run `uv run --frozen python research_validate.py` before benchmarking. Any failure
-rejects the candidate. Then run `uv run --frozen python benchmark_sha256.py --gpu required`.
+rejects the candidate. Then run `uv run --frozen python benchmark_sha256.py --gpu off`.
 The final stdout line is JSON. The score is `best_bend_total_ms`: for each Bend
 execution mode, sum its median batch times across 64-, 1,024-, 16,384-, and
 65,536-byte messages. Select the lowest complete-suite total across sequential
-CPU, parallel CPU and GPU. Do not mix the best per-size samples from different modes. Each
+CPU and parallel CPU. Do not mix the best per-size samples from different modes. Each
 workload hashes exactly 1 MiB of deterministic runtime-loaded binary data.
 Each has an untimed warmup and five measured samples; every digest is checked.
 Autoresearch repeats the complete benchmark three times and compares medians.
@@ -44,12 +44,10 @@ Autoresearch repeats the complete benchmark three times and compares medians.
 The Python leaderboard measures hashlib, PyCryptodome and cryptography. It is
 context, not the optimization metric: slowing down a reference cannot improve
 the score. "Fastest Python" means fastest among those measured on this machine.
-The GPU check is mandatory on this Metal-capable machine. It also measures the
-same proved public hash on a balanced parallel message tree, once with GPU
-forced off and once with GPU forced on. Every GPU digest is checked. GPU and
-parallel CPU totals are reported separately; the optimization metric is the
-fastest complete-suite Bend mode, which may change between candidates. No CPU
-fallback may be labeled a GPU result.
+Both sequential CPU and parallel CPU are mandatory, regardless of GPU hardware.
+The parallel message tree runs with `--gpu off` and uses the same proved public
+hash. GPU timing is excluded from scoring and disabled in research runs.
+Optional GPU diagnostics from manual runs cannot affect acceptance.
 
 Compilation, process startup, file loading, message chunking, hex conversion and
 output are excluded. Hashing, digest production and result retention are timed.

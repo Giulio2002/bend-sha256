@@ -117,7 +117,7 @@ def native_samples(binary, native_env, expected, *options):
     return {"median_ms": statistics.median(samples), "samples_ms": samples}
 
 
-def benchmark(gpu_mode="auto"):
+def benchmark(gpu_mode="off"):
     backends = python_backends()  # Require all three, never silently skip a missing competitor.
     env = {**os.environ, "BEND_NO_TELEMETRY": "1"}
     version = run(["bend", "--version"], env=env).strip()
@@ -127,7 +127,7 @@ def benchmark(gpu_mode="auto"):
     if gpu_mode == "required" and not hardware["available"]:
         raise RuntimeError("GPU required but unavailable: " + hardware.get("reason", "No Metal device"))
     report = {
-        "schema": 1, "metric": "best_bend_total_ms", "samples_per_workload": SAMPLES,
+        "schema": 2, "scored_modes": ["sequential_cpu", "parallel_cpu"], "metric": "best_bend_total_ms", "samples_per_workload": SAMPLES,
         "seed": SEED, "corpus_bytes_per_workload": CORPUS_BYTES,
         "environment": {"python": sys.version, "platform": platform.platform(),
                         "machine": platform.machine(), "bend": version,
@@ -147,9 +147,8 @@ def benchmark(gpu_mode="auto"):
         print("Building native Bend benchmark (outside timing)", file=sys.stderr, flush=True)
         run(["bend", "benchmarks/driver.bend", "-o", str(binary)], env=env)
         gpu_binary = temp / "gpu-native"
-        if hardware["available"]:
-            print("Building native Bend GPU benchmark (outside timing)", file=sys.stderr, flush=True)
-            run(["bend", "benchmarks/gpu_driver.bend", "-o", str(gpu_binary)], env=env)
+        print("Building native Bend parallel benchmark (outside timing)", file=sys.stderr, flush=True)
+        run(["bend", "benchmarks/gpu_driver.bend", "-o", str(gpu_binary)], env=env)
         corpus = random.Random(SEED).randbytes(CORPUS_BYTES)
         data_file = temp / "corpus.bin"
         data_file.write_bytes(corpus)
@@ -169,9 +168,11 @@ def benchmark(gpu_mode="auto"):
                     "fastest_python": winner, "fastest_python_ms": python_ms,
                     "bend_over_python": bend_ms / python_ms,
                     "bend_mib_per_second": CORPUS_BYTES / 1048576 / (bend_ms / 1000)}
+            parallel_env = {**native_env, "SHA_BENCH_DEPTH": str(len(messages).bit_length() - 1)}
+            item["bend_parallel_cpu"] = native_samples(gpu_binary, parallel_env, expected, "--gpu", "off")
+            print(f"{size:>6} B | Bend parallel CPU {item['bend_parallel_cpu']['median_ms']} ms",
+                  file=sys.stderr, flush=True)
             if hardware["available"]:
-                parallel_env = {**native_env, "SHA_BENCH_DEPTH": str(len(messages).bit_length() - 1)}
-                item["bend_parallel_cpu"] = native_samples(gpu_binary, parallel_env, expected, "--gpu", "off")
                 item["bend_gpu"] = native_samples(gpu_binary, parallel_env, expected, "--gpu", "on")
                 print(f"{size:>6} B | Bend parallel CPU {item['bend_parallel_cpu']['median_ms']} ms "
                       f"| Bend {hardware['backend']} GPU {item['bend_gpu']['median_ms']} ms",
@@ -190,11 +191,10 @@ def benchmark(gpu_mode="auto"):
     if hardware["available"]:
         report["gpu"]["status"] = "measured"
         report["bend_gpu_total_ms"] = sum(row["bend_gpu"]["median_ms"] for row in report["workloads"])
-        report["bend_parallel_cpu_total_ms"] = sum(row["bend_parallel_cpu"]["median_ms"] for row in report["workloads"])
-    bend_totals = {"sequential_cpu": report["bend_total_ms"]}
-    if hardware["available"]:
-        bend_totals.update(parallel_cpu=report["bend_parallel_cpu_total_ms"],
-                           gpu=report["bend_gpu_total_ms"])
+    report["bend_parallel_cpu_total_ms"] = sum(row["bend_parallel_cpu"]["median_ms"] for row in report["workloads"])
+    # Optional GPU diagnostics never contribute to the optimization score.
+    bend_totals = {"sequential_cpu": report["bend_total_ms"],
+                   "parallel_cpu": report["bend_parallel_cpu_total_ms"]}
     report["bend_mode_totals_ms"] = bend_totals
     report["best_bend_mode"] = min(bend_totals, key=bend_totals.get)
     report["best_bend_total_ms"] = bend_totals[report["best_bend_mode"]]
@@ -206,8 +206,8 @@ def benchmark(gpu_mode="auto"):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="Also save the complete JSON report")
-    parser.add_argument("--gpu", choices=("auto", "required", "off"), default="auto",
-                        help="Detect GPU, require real GPU execution, or disable the GPU comparison")
+    parser.add_argument("--gpu", choices=("auto", "required", "off"), default="off",
+                        help="Optional GPU diagnostic only; default off. Scoring always uses CPU modes only")
     args = parser.parse_args()
     report = benchmark(args.gpu)
     if args.output:

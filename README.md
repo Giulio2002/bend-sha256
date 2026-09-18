@@ -199,19 +199,20 @@ These are recorded local results, not a claim about a hosted CI run. See
 
 Reference: [NIST FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf).
 
-## Performance benchmark and GPU check
+## CPU performance benchmark
 
 Install the locked Python comparison backends, then benchmark:
 
 ```sh
 uv sync --python 3.12
-uv run --frozen python benchmark_sha256.py --gpu required
+uv run --frozen python benchmark_sha256.py --gpu off
 ```
 
 `--gpu required` forces real GPU execution and fails if the device, compiler,
-GPU build or digest checks fail. `--gpu auto` (the default) detects Metal on macOS
+GPU build or digest checks fail. `--gpu auto` detects Metal on macOS
 or NVIDIA CUDA with its toolkit on Linux; an unavailable GPU is explicitly
-reported as skipped. `--gpu off` runs only the sequential Bend/Python comparison.
+reported as skipped. `--gpu off` is the default and measures both sequential and parallel CPU against Python.
+GPU measurements are optional diagnostics and never contribute to the score.
 GPU build or execution errors on a detected device are errors, not silent skips.
 
 The benchmark compares our public `SHA.sha256` against three Python interfaces:
@@ -234,7 +235,8 @@ round performance.
 
 Bend's GPU driver builds a balanced tree of independent messages before timing.
 Every leaf calls the same proved public `SHA.sha256`. It runs with GPU forced
-off for parallel CPU comparison and forced on for Metal/CUDA. GPU dispatch and
+off for the mandatory parallel CPU comparison. Optional GPU diagnostics force
+it on for Metal/CUDA. GPU dispatch and
 completion synchronization are inside the measured interval. The result is
 host-observed completion time, not a GPU kernel-only timing. GPU execution does
 not imply that Bend's GPU compiler/runtime has been formally verified.
@@ -310,12 +312,11 @@ above 3 percent, beyond timing noise; proof churn alone is not an improvement.
 The hash manifest is a reviewed, protected baseline that the agent may not edit.
 
 The metric is the fastest complete-suite Bend time (`best_bend_total_ms`) across
-sequential CPU, parallel CPU and GPU, not a ratio that could improve by slowing
+sequential CPU and parallel CPU, not a ratio that could improve by slowing
 Python down. Each mode's four workload medians are summed first; the smallest
 mode total wins. The runner never mixes per-size winners into a synthetic mode.
 A candidate may change which mode wins; it must beat the previous best under
-the same scoring rule. The benchmark, including mandatory GPU
-checks, is repeated three times. Acceptance requires more than 3 percent gain
+the same scoring rule. The CPU benchmark is repeated three times. Acceptance requires more than 3 percent gain
 and an independent orchestrator approval based on code, proofs, measurements
 and previous runs. The orchestrator verifies all mode totals and the winning mode.
 The loop stops after three consecutive misses, with no total iteration cap.
@@ -328,7 +329,7 @@ agent events, exposed reasoning summaries and review evidence are retained under
 uv run autoresearch export ../bend-sha256/.autoresearch/runs/RUN_ID --to ../sha256-optimized
 ```
 
-An absent or failed proof, validation, GPU check or review cannot become an
+An absent or failed proof, validation, CPU benchmark or review cannot become an
 accepted improvement. The static contract checks and orchestrator add defenses;
 they are not a proof of the orchestration software or a hostile-code sandbox.
 The formal claim remains exactly the trust boundary described above and in

@@ -98,11 +98,11 @@ class ContractTests(unittest.TestCase):
         def timing(binary, env, expected, *options):
             size = int(env['SHA_BENCH_SIZE'])
             if not options:
-                value = 100
+                value = 100 if size in (64, 16384) else 5
             elif options[-1] == 'off':
                 value = 5 if size in (64, 16384) else 100
             else:
-                value = 100 if size in (64, 16384) else 5
+                value = 1
             return {'median_ms': value, 'samples_ms': [value] * 5}
         with patch.object(benchmark, 'run', return_value='bend 2.0.5'), \
              patch.object(benchmark, 'gpu_hardware', return_value={'available': True, 'backend': 'test'}), \
@@ -110,9 +110,23 @@ class ContractTests(unittest.TestCase):
              patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
              contextlib.redirect_stderr(io.StringIO()):
             result = benchmark.benchmark('required')
-        self.assertEqual(result['bend_mode_totals_ms'], {'sequential_cpu': 400, 'parallel_cpu': 210, 'gpu': 210})
+        self.assertEqual(result['bend_mode_totals_ms'], {'sequential_cpu': 210, 'parallel_cpu': 210})
         self.assertEqual(result['best_bend_total_ms'], 210)
-        self.assertEqual(result['best_bend_mode'], 'parallel_cpu')
+        self.assertEqual(result['best_bend_mode'], 'sequential_cpu')
+        self.assertEqual(result['bend_gpu_total_ms'], 4)
+
+    def test_gpu_off_keeps_parallel_cpu_without_hardware_detection(self):
+        with patch.object(benchmark, 'run', return_value='bend 2.0.5'), \
+             patch.object(benchmark, 'gpu_hardware', side_effect=AssertionError('GPU detection must not run')), \
+             patch.object(benchmark, 'native_samples', return_value={'median_ms': 100, 'samples_ms': [100] * 5}) as timing, \
+             patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
+             contextlib.redirect_stderr(io.StringIO()):
+            result = benchmark.benchmark()
+        self.assertEqual(result['bend_mode_totals_ms'], {'sequential_cpu': 400, 'parallel_cpu': 400})
+        self.assertNotIn('bend_gpu_total_ms', result)
+        self.assertEqual(timing.call_count, 8)
+        for call in timing.call_args_list[1::2]:
+            self.assertEqual(call.args[-2:], ('--gpu', 'off'))
 
     def test_native_every_digest_checked(self):
         expected = [bytes.fromhex('ab' * 32), bytes.fromhex('cd' * 32)]
