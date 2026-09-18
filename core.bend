@@ -159,6 +159,37 @@ def fused_compress(+block: List<&2, U32>, +extra: Nat, +ks: List<&2, U32>, +s: S
     case _:
       fused_compress_slow(block, extra, ks, s)
 
+# Fast path for the 16-word blocks produced by block_bytes. It executes the
+# seed rounds directly and constructs only the fixed rolling window.
+def window_compress16(+a: U32, +b: U32, +c: U32, +d: U32,
+  +e: U32, +f: U32, +g: U32, +h: U32,
+  +i: U32, +j: U32, +k: U32, +l: U32,
+  +m: U32, +n: U32, +o: U32, +p: U32,
+  +extra: Nat, +ks: List<&2, U32>, +s: S.State) -> S.State:
+  match ks:
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <>
+      k8 <> k9 <> k10 <> k11 <> k12 <> k13 <> k14 <> k15 <> kt:
+      s1 = step(s, k0, a)
+      s2 = step(s1, k1, b)
+      s3 = step(s2, k2, c)
+      s4 = step(s3, k3, d)
+      s5 = step(s4, k4, e)
+      s6 = step(s5, k5, f)
+      s7 = step(s6, k6, g)
+      s8 = step(s7, k7, h)
+      s9 = step(s8, k8, i)
+      s10 = step(s9, k9, j)
+      s11 = step(s10, k10, k)
+      s12 = step(s11, k11, l)
+      s13 = step(s12, k12, m)
+      s14 = step(s13, k13, n)
+      s15 = step(s14, k14, o)
+      s16 = step(s15, k15, p)
+      feedforward(s, window_rounds(extra,
+        W{p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a}, kt, s16))
+    case _:
+      fused_compress([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra, ks, s)
+
 def blocks(prepared: List<&2, List<&2, U32>>, +ks: List<&2, U32>, s: S.State) -> S.State:
   match prepared:
     case Nil{}:
@@ -243,13 +274,12 @@ def block_words(ws: List<&2, U32>, +extra: Nat, +ks: List<&2, U32>, s: S.State) 
 def block_bytes(bytes: List<&2, U32>, +extra: Nat, +ks: List<&2, U32>, s: S.State) -> S.State:
   match bytes:
     case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> b60 <> b61 <> b62 <> b63 <> rest:
-      block = {[
+      block_bytes(rest, extra, ks, window_compress16(
         pack(b0, b1, b2, b3), pack(b4, b5, b6, b7), pack(b8, b9, b10, b11), pack(b12, b13, b14, b15),
         pack(b16, b17, b18, b19), pack(b20, b21, b22, b23), pack(b24, b25, b26, b27), pack(b28, b29, b30, b31),
         pack(b32, b33, b34, b35), pack(b36, b37, b38, b39), pack(b40, b41, b42, b43), pack(b44, b45, b46, b47),
-        pack(b48, b49, b50, b51), pack(b52, b53, b54, b55), pack(b56, b57, b58, b59), pack(b60, b61, b62, b63)
-      ] : List<&2, U32>}
-      block_bytes(rest, extra, ks, fused_compress(block, extra, ks, s))
+        pack(b48, b49, b50, b51), pack(b52, b53, b54, b55), pack(b56, b57, b58, b59), pack(b60, b61, b62, b63),
+        extra, ks, s))
     case _:
       s
 

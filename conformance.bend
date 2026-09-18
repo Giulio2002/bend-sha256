@@ -486,6 +486,66 @@ def fused_compress_correct(block, extra, ks, s):
     case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}:
       fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}, extra, ks, s)
 
+law window_compress16_correct:
+  for +a: U32
+  for +b: U32
+  for +c: U32
+  for +d: U32
+  for +e: U32
+  for +f: U32
+  for +g: U32
+  for +h: U32
+  for +i: U32
+  for +j: U32
+  for +k: U32
+  for +l: U32
+  for +m: U32
+  for +n: U32
+  for +o: U32
+  for +p: U32
+  for +extra: Nat
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.window_compress16(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, extra, ks, s) ==
+    C.fused_compress([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra, ks, s) : S.State}
+
+def window_compress16_correct(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, extra, ks, s):
+  match ks:
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> k11 <> k12 <> k13 <> k14 <> k15 <> kt:
+      {==}
+    case Nil{}:
+      {==}
+    case k0 <> Nil{}:
+      {==}
+    case k0 <> k1 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> k11 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> k11 <> k12 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> k11 <> k12 <> k13 <> Nil{}:
+      {==}
+    case k0 <> k1 <> k2 <> k3 <> k4 <> k5 <> k6 <> k7 <> k8 <> k9 <> k10 <> k11 <> k12 <> k13 <> k14 <> Nil{}:
+      {==}
+
 law blocks_correct:
   for +ws: List<&2, List<&2, U32>>
   for +ks: List<&2, U32>
@@ -575,13 +635,26 @@ def block_bytes_correct(bytes, extra, ks, s):
         C.pack(b32, b33, b34, b35), C.pack(b36, b37, b38, b39), C.pack(b40, b41, b42, b43), C.pack(b44, b45, b46, b47),
         C.pack(b48, b49, b50, b51), C.pack(b52, b53, b54, b55), C.pack(b56, b57, b58, b59), C.pack(b60, b61, b62, b63)
       ] : List<&2, U32>}
+      +fast = C.window_compress16(
+        C.pack(b0, b1, b2, b3), C.pack(b4, b5, b6, b7), C.pack(b8, b9, b10, b11), C.pack(b12, b13, b14, b15),
+        C.pack(b16, b17, b18, b19), C.pack(b20, b21, b22, b23), C.pack(b24, b25, b26, b27), C.pack(b28, b29, b30, b31),
+        C.pack(b32, b33, b34, b35), C.pack(b36, b37, b38, b39), C.pack(b40, b41, b42, b43), C.pack(b44, b45, b46, b47),
+        C.pack(b48, b49, b50, b51), C.pack(b52, b53, b54, b55), C.pack(b56, b57, b58, b59), C.pack(b60, b61, b62, b63),
+        extra, ks, s)
       %schedule_correct(extra, block) :
-        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(F.compress(_, ks, s)) : S.State}
+        {C.block_bytes(rest, extra, ks, fast) == F.blocks(F.schedules(F.words(rest), extra), ks)(F.compress(_, ks, s)) : S.State}
       %compression_correct(C.schedule(extra, block), ks, s) :
-        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
+        {C.block_bytes(rest, extra, ks, fast) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
       %fused_compress_correct(block, extra, ks, s) :
-        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
-      block_bytes_correct(rest, extra, ks, C.fused_compress(block, extra, ks, s))
+        {C.block_bytes(rest, extra, ks, fast) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
+      %window_compress16_correct(
+        C.pack(b0, b1, b2, b3), C.pack(b4, b5, b6, b7), C.pack(b8, b9, b10, b11), C.pack(b12, b13, b14, b15),
+        C.pack(b16, b17, b18, b19), C.pack(b20, b21, b22, b23), C.pack(b24, b25, b26, b27), C.pack(b28, b29, b30, b31),
+        C.pack(b32, b33, b34, b35), C.pack(b36, b37, b38, b39), C.pack(b40, b41, b42, b43), C.pack(b44, b45, b46, b47),
+        C.pack(b48, b49, b50, b51), C.pack(b52, b53, b54, b55), C.pack(b56, b57, b58, b59), C.pack(b60, b61, b62, b63),
+        extra, ks, s) :
+        {C.block_bytes(rest, extra, ks, fast) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
+      block_bytes_correct(rest, extra, ks, fast)
     case Nil{}:
       {==}
     case b0 <> Nil{}:
