@@ -143,6 +143,9 @@ def benchmark(gpu_mode="off"):
     }
     with tempfile.TemporaryDirectory(prefix="bend-sha256-bench-") as directory:
         temp = Path(directory)
+        module_cache = temp / "clang-module-cache"
+        module_cache.mkdir()
+        env["CLANG_MODULE_CACHE_PATH"] = str(module_cache)
         binary = temp / "native"
         print("Building native Bend benchmark (outside timing)", file=sys.stderr, flush=True)
         run(["bend", "benchmarks/driver.bend", "-o", str(binary)], env=env)
