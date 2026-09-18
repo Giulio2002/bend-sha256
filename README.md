@@ -196,3 +196,134 @@ These are recorded local results, not a claim about a hosted CI run. See
 | `test_sha256.py` | Independence checks, negative tests, differential tests |
 
 Reference: [NIST FIPS 180-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf).
+
+## Performance benchmark and GPU check
+
+Install the locked Python comparison backends, then benchmark:
+
+```sh
+uv sync --python 3.12
+uv run --frozen python benchmark_sha256.py --gpu required
+```
+
+`--gpu required` forces real GPU execution and fails if the device, compiler,
+GPU build or digest checks fail. `--gpu auto` (the default) detects Metal on macOS
+or NVIDIA CUDA with its toolkit on Linux; an unavailable GPU is explicitly
+reported as skipped. `--gpu off` runs only the sequential Bend/Python comparison.
+GPU build or execution errors on a detected device are errors, not silent skips.
+
+The benchmark compares our public `SHA.sha256` against three Python interfaces:
+`hashlib`, PyCryptodome and `cryptography`. "Fastest Python" means the fastest
+of these measured implementations on this machine and workload. It is not a
+claim to have exhausted every SHA-256 library. Python's
+[hashlib documentation](https://docs.python.org/3/library/hashlib.html) describes
+its native/OpenSSL-backed hash implementations.
+
+All backends hash identical deterministic binary inputs. Each workload processes
+1 MiB, split into 64-, 1,024-, 16,384-, or 65,536-byte messages. The native driver
+loads and constructs the inputs before starting its clock, invokes the actual
+public Bend function, retains every digest, stops the clock, then prints results.
+Python verifies every native digest and every Python result against hashlib.
+Compilation, process startup, input preparation, hex formatting and output are
+excluded. Hashing and digest allocation/retention are included. The compared APIs
+have different representations: Bend consumes lists of U32 values, while Python
+libraries consume bytes. This is API-level throughput, not isolated compression
+round performance.
+
+Bend's GPU driver builds a balanced tree of independent messages before timing.
+Every leaf calls the same proved public `SHA.sha256`. It runs with GPU forced
+off for parallel CPU comparison and forced on for Metal/CUDA. GPU dispatch and
+completion synchronization are inside the measured interval. The result is
+host-observed completion time, not a GPU kernel-only timing. GPU execution does
+not imply that Bend's GPU compiler/runtime has been formally verified.
+
+Each Bend mode has one unrecorded run and five recorded process runs per size.
+Each run measures a fresh batch; this is not repeated use of a persistent process.
+Bend's millisecond clock requires at least 20 ms per batch; unresolved batches
+fail rather than reporting zero. Python calibrates repeated batches to at least
+50 ms and uses `perf_counter_ns`. Raw samples, library/tool versions, device
+identity, corpus hash and per-size winners are included in the final JSON line.
+Readable progress goes to stderr. Save a report with `--output report.json`.
+
+### Recorded local baseline
+
+On 2026-09-18, Apple M4 with 10 GPU cores, Bend 2.0.5, Python 3.12.12,
+OpenSSL 3.5.5, PyCryptodome 3.23.0 and cryptography 49.0.0:
+
+| Backend | Sum of four batch medians |
+|---|---:|
+| Python hashlib | 4.23 ms |
+| Python cryptography | 14.97 ms |
+| Python PyCryptodome | 52.29 ms |
+| Bend parallel CPU | 325 ms |
+| Bend sequential CPU | 1,239 ms |
+| Bend Metal GPU | 5,537 ms |
+
+These are local measurements of 4 MiB total input per suite. The GPU is slower
+for this implementation and workload; more parallel hardware is not evidence
+of a faster algorithm. See [benchmarks/baseline.json](benchmarks/baseline.json)
+for all raw samples and per-workload results. Timings vary with load and hardware.
+
+## Proof-preserving autoresearch
+
+The research runner is a separate private repository:
+[Giulio2002/autoresearch](https://github.com/Giulio2002/autoresearch).
+The SHA-256 objective, review policy, benchmark and validation gate live here.
+With both repositories cloned next to one another:
+
+```sh
+cd ../autoresearch
+uv sync
+uv run autoresearch check --objective ../bend-sha256/OBJECTIVE.md
+uv run autoresearch run --objective ../bend-sha256/OBJECTIVE.md
+```
+
+Every candidate must pass `uv run --frozen python research_validate.py` before
+it is measured. This gate checks:
+
+- frozen FIPS specification, state type, public theorem and proof entry points;
+- unchanged supporting law statements and imports, with no unsafe code, holes,
+  foreign imports, effects or overrides of trusted definitions;
+- the universal theorem and all four concrete digest proofs;
+- all 182 differential cases on both JS and native CPU backends;
+- three type-correct public API mutations that the universal proof must reject.
+
+The original 12 implementation-text mutations still run with
+`uv run --frozen python test_sha256.py --native`. Their textual anchors can
+legitimately disappear during optimization, so the research gate uses structural
+public-wrapper mutations instead: zero digest, prepended byte, and reversed
+digest. Each mutant must first execute successfully, then fail the universal
+proof. The original mutation suite remains enabled by default.
+
+The agent can edit `core.bend`, `sha256.bend`, and supporting proof bodies in
+`conformance.bend`, `list_proofs.bend`, and `padding_proof.bend`. The existing
+supporting statements and import graph are deliberately frozen. This limits
+which refactors can be attempted, but prevents changing the correctness target
+alongside the implementation. A broader proof architecture requires a separately
+reviewed change to the research contract. The hash manifest is a reviewed,
+protected baseline, not something the agent is allowed to regenerate.
+
+The metric is the fastest complete-suite Bend time (`best_bend_total_ms`) across
+sequential CPU, parallel CPU and GPU, not a ratio that could improve by slowing
+Python down. Each mode's four workload medians are summed first; the smallest
+mode total wins. The runner never mixes per-size winners into a synthetic mode.
+A candidate may change which mode wins; it must beat the previous best under
+the same scoring rule. The benchmark, including mandatory GPU
+checks, is repeated three times. Acceptance requires more than 3 percent gain
+and an independent orchestrator approval based on code, proofs, measurements
+and previous runs. The orchestrator verifies all mode totals and the winning mode.
+The default budget is three consecutive misses, at most eight attempts.
+
+The source checkout is never edited by the loop. Runs, temporary directories,
+agent events, exposed reasoning summaries and review evidence are retained under
+`.autoresearch/runs`. Export an approved result into a new directory:
+
+```sh
+uv run autoresearch export ../bend-sha256/.autoresearch/runs/RUN_ID --to ../sha256-optimized
+```
+
+An absent or failed proof, validation, GPU check or review cannot become an
+accepted improvement. The static contract checks and orchestrator add defenses;
+they are not a proof of the orchestration software or a hostile-code sandbox.
+The formal claim remains exactly the trust boundary described above and in
+[CORRECTNESS.md](CORRECTNESS.md).

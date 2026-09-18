@@ -144,3 +144,16 @@ compared element by element with hashlib's digest bytes, checking the length,
 order, and U32 values (including their zero high bits). Three additional negative
 checks change the output byte order, narrow a byte mask, or omit an output byte;
 the universal gate must reject each at `digest_bytes_correct`.
+
+## Optimization gate
+
+`research_validate.py` freezes the original specification, state type, public
+claim and proof entry points through `benchmarks/proof_contract.json`. Supporting
+proof bodies may change during research, while their law declarations and imports
+remain fixed. The gate also checks both execution backends and three structural
+public API mutations. It runs before every candidate benchmark.
+
+GPU benchmarking invokes the same public implementation at each message-tree
+leaf and checks every output against hashlib. This adds GPU execution evidence;
+it does not extend the theorem to proving the Metal/CUDA compiler, scheduler,
+runtime, hardware, timing behavior, or the benchmark harness.

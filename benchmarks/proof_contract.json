@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "frozen_sha256": {
+    "fips.bend": "a1633fe06d34986d06421a08e2f6fd51f6fe2e5ff727501d97ead220cae85db7",
+    "state.bend": "24b4bb267fe94bd1615a8cff6aa090fff766c9009b5f9aa1c08a865b87d06230",
+    "LAWS.bend": "5c5efb576f49e35f0c4a18df4e8df406499cd8d815806ee8d8c1828ea0df98d5",
+    "CORRECTNESS.bend": "64eb7ea457616ca363a5f9e5aff44883cdebd1c852f332ec75c3029684eef124",
+    "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
+    "test_sha256.py": "85946378bd3867a1b0963cdb21087a12e32a543b1d31d816f299d4e63ef9337f",
+    "research_validate.py": "4f4ff68953de3cebaa394698669a0ba1e55de27717bb9652b9784ba2cc4f99e2",
+    "benchmark_sha256.py": "8d01eaffbfb7c2081966b6045fac688e8127617d14b11fde9ddfb95755b3e9b0",
+    "benchmarks/driver.bend": "7f3a23118f3719786373de925adeb62c8e4aaea8958af86b51e5737c77c1c3bd",
+    "pyproject.toml": "527cafbfc3af4b1ef0c33939a95eb0bc4f985ce2f7ecf5cfd61fb8f61408f334",
+    "uv.lock": "ae211662260fb93a1bd6cacd7bf538abd4692a64092f5c75d3957b662ce51a90",
+    "benchmarks/gpu_driver.bend": "db63888f8e50a7865384f3ab270cb8e394d032a3469e83cd02c21c31d40cdf51"
+  },
+  "imports": {
+    "core.bend": [
+      "Base",
+      "./state.bend as S"
+    ],
+    "sha256.bend": [
+      "Base",
+      "./core.bend as Core",
+      "./conformance.bend as Proof"
+    ],
+    "conformance.bend": [
+      "Base",
+      "./state.bend as S",
+      "./core.bend as C",
+      "./fips.bend as F",
+      "./list_proofs.bend as L",
+      "./padding_proof.bend as Padding"
+    ],
+    "list_proofs.bend": [
+      "Base"
+    ],
+    "padding_proof.bend": [
+      "Base",
+      "./fips.bend as F"
+    ]
+  },
+  "laws": {
+    "core.bend": [],
+    "sha256.bend": [],
+    "conformance.bend": [
+      "law count_acc:\n  for +xs: List<&2, U32>\n  for +acc: Nat\n  {C.byte_count(xs, acc) == Nat.add(List.length(&2, U32, xs), acc) : Nat}",
+      "law count_correct:\n  for +xs: List<&2, U32>\n  {C.byte_count(xs, 0n) == List.length(&2, U32, xs) : Nat}",
+      "law octets_correct:\n  for +width: Nat\n  for +n: Nat\n  for +acc: List<&2, U32>\n  {C.length_octets(width, n, acc) == List.append(&2, U32, F.octets(width, n), acc) : List<&2, U32>}",
+      "law length_correct:\n  for +n: Nat\n  {C.bit_length(n) == F.length_field(n) : List<&2, U32>}",
+      "law pad_correct:\n  for +xs: List<&2, U32>\n  {C.pad(xs) == F.pad(xs) : List<&2, U32>}",
+      "law words_acc:\n  for +bytes: List<&2, U32>\n  for +acc: List<&2, U32>\n  {C.words_go(bytes, acc) == List.reverse.go(&2, U32, acc, F.words(bytes)) : List<&2, U32>}",
+      "law words_correct:\n  for bytes: List<&2, U32>\n  {C.words(bytes) == F.words(bytes) : List<&2, U32>}",
+      "law nth_correct:\n  for xs: List<&2, U32>\n  for n: Nat\n  {C.get(xs, n) == F.nth(xs, n) : U32}",
+      "law next_correct:\n  for +hs: List<&2, U32>\n  {C.next_word(hs) == F.recurrence(hs) : U32}",
+      "law extension_correct:\n  for +n: Nat\n  for +hs: List<&2, U32>\n  {C.expand(n, hs) == F.extension(n, hs) : List<&2, U32>}",
+      "law schedule_correct:\n  for +extra: Nat\n  for +block: List<&2, U32>\n  {C.schedule(extra, block) == F.schedule(extra, block) : List<&2, U32>}",
+      "law schedules_acc:\n  for +ws: List<&2, U32>\n  for +extra: Nat\n  for +acc: List<&2, List<&2, U32>>\n  {C.schedules_go(ws, extra, acc) == List.reverse.go(&2, List<&2, U32>, acc, F.schedules(ws, extra)) : List<&2, List<&2, U32>>}",
+      "law schedules_correct:\n  for ws: List<&2, U32>\n  for extra: Nat\n  {C.schedules(ws, extra) == F.schedules(ws, extra) : List<&2, List<&2, U32>>}",
+      "law prepare_correct:\n  for +bytes: List<&2, U32>\n  for +extra: Nat\n  {C.prepare(bytes, extra) == F.prepare(bytes, extra) : List<&2, List<&2, U32>>}",
+      "law step_correct:\n  for s: S.State\n  for k: U32\n  for w: U32\n  {C.step(s, k, w) == F.step(s, k, w) : S.State}",
+      "law rounds_correct:\n  for +ks: List<&2, U32>\n  for +ws: List<&2, U32>\n  for +s: S.State\n  {C.rounds(ks, ws, s) == F.rounds(ks, ws)(s) : S.State}",
+      "law feedforward_correct:\n  for x: S.State\n  for y: S.State\n  {C.feedforward(x, y) == F.feedforward(x, y) : S.State}",
+      "law compression_correct:\n  for +ws: List<&2, U32>\n  for +ks: List<&2, U32>\n  for +s: S.State\n  {C.compress(ws, ks, s) == F.compress(ws, ks, s) : S.State}",
+      "law blocks_correct:\n  for +ws: List<&2, List<&2, U32>>\n  for +ks: List<&2, U32>\n  for +s: S.State\n  {C.blocks(ws, ks, s) == F.blocks(ws, ks)(s) : S.State}",
+      "law digest_correct:\n  for s: S.State\n  {C.digest(s) == F.digest(s) : List<&2, U32>}",
+      "law hash_correct:\n  for +bytes: List<&2, U32>\n  for +extra: Nat\n  for +ks: List<&2, U32>\n  {C.hash(bytes, extra, ks) == F.hash(bytes, extra, ks) : List<&2, U32>}"
+    ],
+    "list_proofs.bend": [
+      "law append_assoc:\n  for -A: Data\n  for xs: List<&2, A>\n  for ys: List<&2, A>\n  for zs: List<&2, A>\n  {List.append(&2, A, List.append(&2, A, xs, ys), zs)\n    == List.append(&2, A, xs, List.append(&2, A, ys, zs)) : List<&2, A>}",
+      "law reverse_twice:\n  for -A: Data\n  for xs: List<&2, A>\n  for acc: List<&2, A>\n  for ys: List<&2, A>\n  {List.reverse.go(&2, A, List.reverse.go(&2, A, xs, acc), ys)\n    == List.reverse.go(&2, A, acc, List.append(&2, A, xs, ys)) : List<&2, A>}",
+      "law reverse_append:\n  for -A: Data\n  for xs: List<&2, A>\n  for ys: List<&2, A>\n  {List.reverse.go(&2, A, List.reverse(&2, A, xs), ys)\n    == List.append(&2, A, xs, ys) : List<&2, A>}",
+      "law add_succ:\n  for n: Nat\n  for m: Nat\n  {Nat.add(n, 1n+m) == 1n+Nat.add(n, m) : Nat}",
+      "law add_zero:\n  for n: Nat\n  {Nat.add(n, 0n) == n : Nat}",
+      "law append_assoc_reverse:\n  for -A: Data\n  for +xs: List<&2, A>\n  for +ys: List<&2, A>\n  for +zs: List<&2, A>\n  {List.append(&2, A, xs, List.append(&2, A, ys, zs))\n    == List.append(&2, A, List.append(&2, A, xs, ys), zs) : List<&2, A>}"
+    ],
+    "padding_proof.bend": [
+      "law zeros_correct:\n  for r: Nat\n  {Nat.mod(Nat.sub(119n, r), 64n) == F.zero_count(r) : Nat}"
+    ]
+  }
+}

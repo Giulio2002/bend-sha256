@@ -1,0 +1,9 @@
+[project]
+name = "bend-sha256-benchmarks"
+version = "0.1.0"
+description = "Native Bend SHA-256 comparison and proof-preserving research gates"
+requires-python = ">=3.11"
+dependencies = ["pycryptodome>=3.23,<4", "cryptography>=46,<50"]
+
+[tool.uv]
+package = false

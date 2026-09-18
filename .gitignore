@@ -1,2 +1,6 @@
 __pycache__/
 .test-*/
+.venv/
+.autoresearch/
+.bench-*/
+.nanocodex/

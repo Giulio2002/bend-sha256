@@ -103,6 +103,8 @@ def check_rejected_mutations():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--native", action="store_true", help="Also build and test the native C backend")
+    parser.add_argument("--skip-mutations", action="store_true",
+                        help="Skip baseline-specific textual mutations; research_validate.py supplies structural mutations")
     args = parser.parse_args()
     check_spec_independence()
     universal = run(["bend", "CORRECTNESS.bend"])
@@ -111,7 +113,8 @@ def main():
     proof = run(["bend", "PROOF.bend"])
     assert "All terms check." in proof and "unsafe" not in proof.lower(), proof
     print("Bend proofs: All terms check.")
-    check_rejected_mutations()
+    if not args.skip_mutations:
+        check_rejected_mutations()
     vectors = cases()
     source = "import Base\nimport ../sha256.bend as SHA\n\n"
     source += "def repeat(n: Nat, acc: List<&2, U32>) -> List<&2, U32>:\n"
