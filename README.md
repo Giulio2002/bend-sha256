@@ -310,13 +310,16 @@ it is measured. This gate checks:
 - all 182 differential cases for each API on both JS and native CPU backends;
 - three type-correct public API mutations that the universal proof must reject.
 
-The legacy `test_sha256.py --native` command still enables the original
-15 implementation-text mutations by default. Some anchors no longer match the
-optimized implementation, so that command is not the current acceptance gate.
-Use `python3 research_validate.py`: it runs the execution suite with legacy
-mutations disabled, then checks structural public-wrapper mutations for a zero
-digest, prepended byte, and reversed digest. Each mutant must first execute
-successfully, then fail the universal proof.
+The standalone `python3 test_sha256.py --native` command and the full
+`python3 research_validate.py` gate both use structural public-wrapper mutations
+for a zero digest, prepended byte, and reversed digest. Each mutant must execute
+successfully, then fail the universal proof. The full gate runs this suite once,
+after invoking the standalone execution checks with `--skip-mutations`.
+
+Historical text mutations require `--legacy-mutations` and their original source
+anchors. They are not the default and may fail on optimized implementations.
+Standalone correctness checks use explicit exceptions and remain active under
+Python `-O` and `-OO`. The full gate also rejects optimized Python execution.
 
 The agent can edit `core.bend`, `sha256.bend`, `conformance.bend`,
 `list_proofs.bend`, `padding_proof.bend`, and `CORRECTNESS.bend`. Supporting

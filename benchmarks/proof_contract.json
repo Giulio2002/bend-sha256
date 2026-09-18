@@ -5,7 +5,7 @@
     "state.bend": "24b4bb267fe94bd1615a8cff6aa090fff766c9009b5f9aa1c08a865b87d06230",
     "LAWS.bend": "a18ba4a1d2632b5b3c20ef265e958bfae3d2af05aa1b8db853a610e63d7a57be",
     "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
-    "test_sha256.py": "42a776a9fbb91d59f06ba9a633ff26306bfc7e5677935a36d9b248a5c764db5d",
+    "test_sha256.py": "84bd7d3c92e8e7ad683e053fa26f7999c0cc8385fdb20821136a75d7f890898d",
     "research_validate.py": "6d766c1736ca1882139947b51740f2788cd477716a2373c7451aec1a81927af6",
     "benchmark_sha256.py": "50db45ad61e6b4bb90b020b051d90e41d195bfdd74a2cb7955f8568d528cafab",
     "benchmarks/driver.bend": "d6c73df3c6ad6a18af2e4f754eb383ca397e1d13cad833f516b543e4e8672709",

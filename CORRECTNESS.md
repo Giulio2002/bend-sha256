@@ -114,7 +114,8 @@ binary bytes, randomized messages, and the standard million-`a` message.
 
 The original implementation passed fifteen text-based negative checks,
 recorded as historical evidence. Their anchors need not survive optimization.
-The current research gate instead checks three structural public mutations.
+The standalone default suite and current research gate instead check three
+structural public mutations; historical text mutations require `--legacy-mutations`.
 The original checks mutated one implementation detail at a time: round
 arithmetic, a table entry, the padding marker, the padding zero count, byte count,
 length encoding, byte order, schedule index, schedule sigma, round sigma, initial

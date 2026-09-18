@@ -47,25 +47,30 @@ def cases():
 
 def verify(lines, expected, backend, width=64):
     actual = [s for s in lines.splitlines() if len(s) == width and all(c in "0123456789abcdef" for c in s)]
-    assert len(actual) == len(expected), (backend, len(actual), len(expected), lines[-500:])
+    if len(actual) != len(expected):
+        raise RuntimeError(f"{backend}: expected {len(expected)} digests, got {len(actual)}: {lines[-500:]}")
     for i, (got, want) in enumerate(zip(actual, expected)):
-        assert got == want, f"{backend} case {i}: {got} != {want}"
+        if got != want:
+            raise RuntimeError(f"{backend} case {i}: {got} != {want}")
     print(f"{backend}: {len(expected)} SHA-256 cases passed")
 
 
 def check_spec_independence():
     source = (ROOT / "fips.bend").read_text()
     imports = re.findall(r"^import (.+)$", source, re.MULTILINE)
-    assert imports == ["Base", "./state.bend as Types"], imports
+    if imports != ["Base", "./state.bend as Types"]:
+        raise RuntimeError(f"Unexpected specification imports: {imports}")
     refs = set(re.findall(r"Types\.([A-Za-z_][A-Za-z_0-9]*)", source))
-    assert refs == {"State", "H"}, refs
+    if refs != {"State", "H"}:
+        raise RuntimeError(f"Unexpected shared specification symbols: {refs}")
     for path in ROOT.glob("*.bend"):
         code = "\n".join(line.split("#", 1)[0] for line in path.read_text().splitlines())
-        assert not re.search(r"@unsafe|\?[A-Za-z_]|import\s+[\"]", code), path
+        if re.search(r"@unsafe|\?[A-Za-z_]|import\s+[\"]", code):
+            raise RuntimeError(f"Unsafe code, holes or foreign imports: {path}")
     print("Specification independence: only Base and the neutral state datatype imported")
 
 
-def check_rejected_mutations():
+def check_legacy_mutations():
     # These run the UNIVERSAL proof gate, which contains no concrete test vectors.
     mutations = [
         ("round", "core.bend", "(t1 + t2 : U32)", "(t1 + t2 + 1 : U32)", "step_correct"),
@@ -91,30 +96,40 @@ def check_rejected_mutations():
                 shutil.copy(file, directory / file.name)
             target = directory / filename
             original = target.read_text()
-            assert original.count(old) == 1, (filename, old, original.count(old))
+            if original.count(old) != 1:
+                raise RuntimeError(f"Legacy mutation anchor unavailable: {filename}: {old!r}; use the default structural mutation suite")
             target.write_text(original.replace(old, new, 1))
             result = subprocess.run(["bend", str(directory / "CORRECTNESS.bend")],
                                     text=True, capture_output=True, timeout=60)
             output = result.stdout + result.stderr
-            assert result.returncode != 0 and location in output, (label, output[-2000:])
+            if result.returncode == 0 or location not in output or "All terms check." in output:
+                raise RuntimeError(f"Legacy mutation {label} was not rejected at {location}: {output[-2000:]}")
     print(f"Universal proof mutation checks: {len(mutations)} algorithm defects rejected without test vectors")
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--native", action="store_true", help="Also build and test the native C backend")
-    parser.add_argument("--skip-mutations", action="store_true",
-                        help="Skip baseline-specific textual mutations; research_validate.py supplies structural mutations")
+    mutations = parser.add_mutually_exclusive_group()
+    mutations.add_argument("--skip-mutations", action="store_true",
+                           help="Skip mutations when an outer validation gate runs them")
+    mutations.add_argument("--legacy-mutations", action="store_true",
+                           help="Run historical text mutations instead; requires their original source anchors")
     args = parser.parse_args()
     check_spec_independence()
     universal = run(["bend", "CORRECTNESS.bend"])
-    assert "All terms check." in universal and "unsafe" not in universal.lower(), universal
+    if "All terms check." not in universal or "unsafe" in universal.lower():
+        raise RuntimeError(f"Universal proof did not check cleanly: {universal}")
     print("Universal correctness theorem: All terms check.")
     proof = run(["bend", "PROOF.bend"])
-    assert "All terms check." in proof and "unsafe" not in proof.lower(), proof
+    if "All terms check." not in proof or "unsafe" in proof.lower():
+        raise RuntimeError(f"Concrete proofs did not check cleanly: {proof}")
     print("Bend proofs: All terms check.")
-    if not args.skip_mutations:
-        check_rejected_mutations()
+    if args.legacy_mutations:
+        check_legacy_mutations()
+    elif not args.skip_mutations:
+        from research_validate import public_mutations
+        public_mutations()
     vectors = cases()
     source = "import Base\nimport ../sha256.bend as SHA\n\n"
     source += "def repeat(n: Nat, acc: List<&2, U32>) -> List<&2, U32>:\n"
