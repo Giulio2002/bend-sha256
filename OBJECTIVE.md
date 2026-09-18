@@ -97,10 +97,25 @@ outputs, or trade away arbitrary-input semantics. General algorithm improvements
 are allowed even if their gain varies by workload.
 
 Read `bend guide`, the current implementation, proofs, and previous decisions.
-Try one focused hypothesis at a time. Prefer improvements whose equivalence you
-can prove against the frozen public claims, such as redundant traversal removal,
-allocation reduction, or equivalent primitive expressions. If proof checking
-fails, repair the proof within scope or abandon the change.
+You are explicitly authorized to rewrite the entire implementation and its
+supporting proofs within the editable modules. You are not limited to small
+patches, local optimizations, or the current algorithm decomposition. A single
+experiment may be a coordinated full rewrite across all editable files.
+
+You may replace list-based internals with new internal datatypes, fixed-width
+word structures, a rolling schedule, fused compression, or another pure Bend
+representation supported by the checker. Declare new internal types in the
+existing editable modules; the frozen specification's shared state datatype
+does not require the implementation to use that representation internally.
+Preserve the public API and prove the new implementation equivalent to the
+unchanged independent specification for every input. You may replace the entire
+supporting lemma structure and public proof implementations to establish this.
+
+Choose a coherent performance hypothesis, even when realizing it requires a
+full rewrite. There is no preference for small diffs or preserving the current
+architecture. Complete the rewrite and its proofs before submitting; partial
+proofs and test-only correctness are not acceptable. All existing scope,
+anti-cheating, measurement and acceptance gates still apply.
 
 An independent read-only orchestrator must approve each measured improvement.
 A gain must exceed 3 percent. Stop after three consecutive attempts without an
