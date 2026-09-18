@@ -33,8 +33,9 @@ The mapping is:
 
 U32 arithmetic expresses modulo-2^32 operations. The schedule is represented by
 reverse history: `previous(history, lag)` indexes `lag-1`. Thus the specification
-names the standard lags 2, 7, 15, and 16; the implementation indexes the history
-at 1, 6, 14, and 15. For a real 16-word block, all these indices are valid.
+names the standard lags 2, 7, 15, and 16. The implementation selects the
+corresponding fields of its fixed 16-word window; supporting list-based helpers
+use indices 1, 6, 14, and 15.
 
 The byte-oriented padding rule uses r = n mod 64. If r <= 55, append 55-r zeros;
 otherwise append 119-r zeros. This leaves eight bytes after the marker and zeros.
@@ -64,6 +65,11 @@ All named equalities in the following table are actual checked Bend laws.
 | `prepare_correct` | The entire concrete preprocessing pipeline agrees |
 | `step_correct`, `rounds_correct` | One round and every finite round sequence agree |
 | `feedforward_correct`, `compression_correct` | Componentwise feed-forward and compression agree |
+| `expanded_rounds_correct`, `schedule_rounds_correct` | Fused schedule generation agrees with materialized schedule rounds |
+| `fused_compress_correct`, `fused_compress_slow_correct` | Window and fallback compression agree with specification compression |
+| `window_rounds_correct`, `window_schedule_rounds_correct` | Fixed-window recurrence and rounds agree with reverse-history lists |
+| `window_compress16_correct` | Direct execution of the first 16 rounds agrees with fused compression |
+| `block_words_correct`, `block_bytes_correct` | Incremental parsing and compression agree with specification block processing |
 | `blocks_correct` | Accumulated block processing equals composition in message order |
 | `digest_correct`, `hash_correct` | Extraction and the full concrete pipeline agree |
 | `Laws.constants_correct`, `Laws.sha256_correct` | Fixed table equality and the actual exported SHA-256 equality |
@@ -75,7 +81,7 @@ The accumulator invariants avoid assumptions about input length:
     schedules_go(words, extra, acc)
       = reverse_append(acc, FIPS.schedules(words, extra))
 
-Their proofs recurse on the remaining input. Pattern cases explicitly cover every
+These helper proofs recurse on the remaining input. Pattern cases explicitly cover every
 short suffix, so no input case is omitted. A generic double-reversal lemma
 connects implementation padding's reverse-append to direct list concatenation.
 
@@ -83,6 +89,12 @@ connects implementation padding's reverse-append to direct list concatenation.
 symbolic `120+p` branch. In that last branch both saturated subtractions reduce
 to zero for arbitrary p. This is a universal case split, not a list of test
 vectors or an empirical bound on message lengths.
+
+The proof of the optimized public path uses `hash_correct`, which invokes
+`block_bytes_correct`; its dependency chain includes `window_compress16_correct`
+and the fixed-window compression lemmas. The
+materialized-list helpers remain useful in the equivalence argument but are
+not the public hashing execution path.
 
 `hash_correct` is generalized over the extension count and constant table. That
 keeps proof checking from expanding large symbolic computations. It does **not**
@@ -100,11 +112,14 @@ proofs, and compares 182 JS/native digest executions against fixed standard
 vectors and Python hashlib. The execution cases include padding boundaries,
 binary bytes, randomized messages, and the standard million-`a` message.
 
-Fifteen negative checks mutate one implementation detail at a time: round
+The original implementation passed fifteen text-based negative checks,
+recorded as historical evidence. Their anchors need not survive optimization.
+The current research gate instead checks three structural public mutations.
+The original checks mutated one implementation detail at a time: round
 arithmetic, a table entry, the padding marker, the padding zero count, byte count,
 length encoding, byte order, schedule index, schedule sigma, round sigma, initial
-state, digest order, output byte order, output byte masking, and omission of an output byte. Each is rejected by `CORRECTNESS.bend`, which does not
-import the concrete-vector proof module. Thus those rejections exercise the
+state, digest order, output byte order, output byte masking, and omission of an output byte. Each was rejected by `CORRECTNESS.bend`, which does not
+import the concrete-vector proof module. Thus those historical rejections exercised the
 universal conformance proof itself.
 
 ## Precise trust boundary
@@ -121,10 +136,11 @@ formally verify the checker, compiler, hardware, or the cryptographic security
 of SHA-256.
 
 The API hashes low-eight-bit interpretations of its U32 inputs. FIPS conformance
-is for byte-aligned messages; this API does not accept fractional-byte messages.
+is for byte-aligned messages shorter than 2^61 bytes; this API does not accept
+fractional-byte messages.
 The theorems cover eight-word and 32-byte digests, not the `ascii`/`hex` presentation helpers.
 Bend execution remains subject to its 2^48−1 Nat limit and available memory; the
-implementation retains the complete message and prepared schedules in memory.
+implementation retains the complete message and uses a rolling schedule window.
 
 ## Byte digest API
 
@@ -142,8 +158,10 @@ transfers this result to the actual public function for every input.
 All 182 execution cases exercise both APIs on JS and native C. Byte results are
 compared element by element with hashlib's digest bytes, checking the length,
 order, and U32 values (including their zero high bits). Three additional negative
-checks change the output byte order, narrow a byte mask, or omit an output byte;
-the universal gate must reject each at `digest_bytes_correct`.
+checks in the original text-mutation suite changed output byte order, narrowed
+a byte mask, or omitted an output byte; these historical checks were rejected
+at `digest_bytes_correct`. Current validation uses the three structural public
+mutations described below.
 
 ## Optimization gate
 
@@ -155,7 +173,29 @@ have a checked proof, and all unchanged public declarations in `LAWS.bend` must
 still be proved unconditionally. The orchestrator audits the revised proof chain. The gate also checks both execution backends and three structural
 public API mutations. It runs before every candidate benchmark.
 
-GPU benchmarking invokes the same public implementation at each message-tree
+Optional GPU benchmarking invokes the same public implementation at each message-tree
 leaf and checks every output against hashlib. This adds GPU execution evidence;
 it does not extend the theorem to proving the Metal/CUDA compiler, scheduler,
 runtime, hardware, timing behavior, or the benchmark harness.
+
+## Specification audit and domain qualification
+
+NIST SHA-256 conformance here is restricted to byte-aligned inputs with fewer
+than 2^61 bytes, corresponding to the standard's bit-length bound below 2^64.
+The universal equality laws intentionally remain unchanged: outside that domain
+they describe equality to the total executable specification, whose fixed-width
+length field wraps, not an extension of NIST's conformance claim.
+
+A source audit and independent prime-root derivation confirmed all 64 round
+constants and eight initial words. Direct reference execution matched both
+APIs on 180 JS cases and 181 native cases; the million-byte reference JS probe
+failed with a runtime memory/stack fault, while native passed. This resource
+limitation does not refute the mathematical theorem or establish a failure in
+the optimized implementation. Both backends passed 19 large length-field probes.
+
+The specification's incomplete-group and short-round fallback cases appear
+unreachable through its public construction. Separate machine-checked alignment,
+schedule-length and round-count invariants remain possible hardening work;
+this audit does not claim those additional laws have been proved. The existing
+proof is equivalence to the explicit specification, whose transcription remains
+within the documented trust boundary.

@@ -25,7 +25,7 @@ Run the checks and example:
 bend CORRECTNESS.bend                   # universal correctness; no test vectors
 bend PROOF.bend                         # also checks four exact digest proofs
 bend main.bend                          # prints SHA-256("abc")
-python3 test_sha256.py --native          # proofs, mutations, JS/native tests
+python3 research_validate.py            # proofs, JS/native tests, negative checks
 ```
 
 The correctness gate prints `All terms check.`. Its public theorem in
@@ -59,8 +59,8 @@ arithmetic. `padding_proof.bend` proves their equivalence for every Nat.
 The specification's list traversals are direct recursion; the implementation's
 large-input traversals use accumulators. Their equivalence is proved by induction.
 
-The proof gate contains 34 checked laws: 21 algorithm lemmas, six generic list/
-Nat lemmas, one padding-arithmetic lemma, and six serialization/public claims. There are no
+The proof gate checks the algorithm lemmas, generic list/Nat lemmas,
+padding arithmetic, serialization, and all five public claims. There are no
 holes, `@unsafe` definitions, or added axioms. See [CORRECTNESS.md](CORRECTNESS.md) for the proof
 structure, specification mapping, and trust boundary.
 
@@ -68,14 +68,15 @@ structure, specification mapping, and trust boundary.
 
 The implementation uses native U32 arithmetic, which wraps modulo 2^32. It
 adds SHA-256 padding, encodes the bit length in eight bytes, decodes big-endian
-words, expands each 16-word block into 64 schedule words, executes the rounds,
-and adds the working state back into the incoming state. The digest is the
+words, generates the 64 schedule words incrementally in a fixed 16-word window,
+executes the rounds, and adds the working state back into the incoming state. The digest is the
 final eight words in order.
 
 Long input traversals use tail recursion to avoid stack growth. This change was
-validated with the standard million-`a` message. The schedule uses reverse
-history: offsets 1, 6, 14, and 15 refer to the preceding words at lags 2, 7, 15,
-and 16. The specification expresses those lags separately.
+validated with the standard million-`a` message. Compression directly executes
+the first 16 rounds from packed words, then generates remaining schedule words
+in a fixed window. The specification uses a reverse-history list, expressing
+the recurrence at lags 2, 7, 15, and 16.
 
 The proof proceeds through byte counting, length encoding, padding, parsing,
 schedule generation, rounds, blocks, and digest extraction. Supporting list
@@ -113,21 +114,28 @@ ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 big-endian order. Each input contributes its **low eight bits**; use 0-255 for
 ordinary bytes. `SHA.hex` formats digest words as lowercase hexadecimal.
 `SHA.ascii` is an ASCII convenience, **not a UTF-8 encoder**. Encode other text
-to bytes before hashing. The formal public theorem concerns the eight digest
-words; the text helpers are covered by execution tests.
+to bytes before hashing. The formal public theorems cover the eight digest
+words and the 32-byte digest API; text helpers are outside these theorems.
 
-Requires **Bend 2.0.5**, not the older Bend 0.2 language. The implementation
-keeps the input and schedules in memory. Bend's runtime Nat limit is 2^48−1;
-available memory is the practical limit. This is a reference implementation,
-not a streaming or performance-tuned library.
+Requires **Bend 2.0.5**, not the older Bend 0.2 language. The optimized
+implementation uses a rolling schedule window and keeps the input in memory;
+this is not a streaming API. Bend's runtime Nat limit is 2^48−1, with available
+memory imposing a smaller practical bound.
+
+NIST conformance applies to byte-aligned messages shorter than 2^61 bytes.
+The all-list equality theorem also covers a mathematical extension outside that
+domain, where the fixed-width length field wraps modulo 2^64. It does not claim
+NIST conformance for those excessive lengths.
 
 ## Evidence and limits
 
 The universal gate checks independently of test vectors. The test harness also
 checks four exact digest proofs, compares 182 cases on JS and native C with
-fixed standard digests/Python hashlib, and deliberately introduces 15 defects.
-The **universal proof alone** rejects all 15, including padding, length encoding,
-byte order, schedule indices, sigma functions, initial state, and constants.
+fixed standard digests/Python hashlib, and checks three structural public API
+mutations in `research_validate.py`.
+The original implementation also passed the 15 text-mutation checks recorded
+below; those historical results are not a claim that every textual anchor
+survives subsequent rewrites.
 The execution suite includes every length 0-129, longer block boundaries,
 all byte values, random binary messages, and the million-`a` vector.
 
@@ -137,12 +145,12 @@ transcription and the proof checker/Base semantics are trusted. The theorem does
 not verify the native compiler, hardware, resource availability, or cryptographic
 collision/preimage resistance. No external crypto library computes the Bend hash.
 
-## Deliberate defect checks
+## Historical deliberate defect checks
 
-Each mutation is applied to a temporary copy. The harness runs
-`CORRECTNESS.bend`, which contains no concrete-message test vectors, and
-requires rejection at the expected proof obligation. The working implementation
-is never modified by these checks.
+In the original implementation, each mutation was applied to a temporary copy.
+The harness ran `CORRECTNESS.bend`, which contains no concrete-message test vectors, and
+required rejection at the expected proof obligation. These historical checks
+did not modify the working implementation.
 
 | Defect | Deliberate change | Rejecting obligation |
 |---|---|---|
@@ -158,10 +166,14 @@ is never modified by these checks.
 | Round sigma | Rotate right by 1 instead of 2 | `step_correct` |
 | Initial state | Increase the first initialization word by 1 | `hash_correct` |
 | Digest order | Swap the first two output words | `digest_correct` |
+| Output byte order | Shift a serialized byte from the wrong position | `digest_bytes_correct` |
+| Output byte mask | Narrow a serialized byte mask | `digest_bytes_correct` |
+| Output byte count | Omit a serialized byte | `digest_bytes_correct` |
 
 ## Recorded verification
 
-The completed local run used Bend 2.0.5:
+The original implementation verification run used Bend 2.0.5. These are
+historical results; current winner validation is reported separately below:
 
 ```text
 Specification independence: only Base and the neutral state datatype imported
@@ -298,12 +310,13 @@ it is measured. This gate checks:
 - all 182 differential cases for each API on both JS and native CPU backends;
 - three type-correct public API mutations that the universal proof must reject.
 
-The existing 15 implementation-text mutations still run with
-`uv run --frozen python test_sha256.py --native`. Their textual anchors can
-legitimately disappear during optimization, so the research gate uses structural
-public-wrapper mutations instead: zero digest, prepended byte, and reversed
-digest. Each mutant must first execute successfully, then fail the universal
-proof. The original mutation suite remains enabled by default.
+The legacy `test_sha256.py --native` command still enables the original
+15 implementation-text mutations by default. Some anchors no longer match the
+optimized implementation, so that command is not the current acceptance gate.
+Use `python3 research_validate.py`: it runs the execution suite with legacy
+mutations disabled, then checks structural public-wrapper mutations for a zero
+digest, prepended byte, and reversed digest. Each mutant must first execute
+successfully, then fail the universal proof.
 
 The agent can edit `core.bend`, `sha256.bend`, `conformance.bend`,
 `list_proofs.bend`, `padding_proof.bend`, and `CORRECTNESS.bend`. Supporting
@@ -355,3 +368,18 @@ every output was checked. Full research validation passed, including universal
 proofs and mutation rejection. These diagnostics ran alongside the research
 worker and are not an orchestrator approval. See
 [measurements and method](benchmarks/rolling_window_evidence.json).
+
+## Current implementation verification
+
+The implementation published at `d329dab` passed fresh validation on 2026-09-18:
+
+- Universal correctness and four concrete digest proofs checked.
+- All 182 cases passed for each word and byte API on JS and native backends.
+- Zero-digest, prepended-byte and reversed-digest mutations executed, then were
+  rejected by the universal proof.
+- The independent specification, public laws and protected imports were unchanged.
+
+These results concern the optimized implementation. Separately executing the
+recursive reference specification hit a JS memory/stack fault on a million-byte
+probe, while its native probe passed. See [the specification audit](CORRECTNESS.md#specification-audit-and-domain-qualification)
+for this resource limitation and remaining specification-hardening opportunities.
