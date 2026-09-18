@@ -112,11 +112,41 @@ law next_correct:
   {C.next_word(hs) == F.recurrence(hs) : U32}
 
 def next_correct(hs):
-  %nth_correct(hs, 1n) : {C.next_word(hs) == (F.sigma1(_) + F.nth(hs, 6n) + F.sigma0(F.nth(hs, 14n)) + F.nth(hs, 15n) : U32) : U32}
-  %nth_correct(hs, 6n) : {C.next_word(hs) == (F.sigma1(C.get(hs, 1n)) + _ + F.sigma0(F.nth(hs, 14n)) + F.nth(hs, 15n) : U32) : U32}
-  %nth_correct(hs, 14n) : {C.next_word(hs) == (F.sigma1(C.get(hs, 1n)) + C.get(hs, 6n) + F.sigma0(_) + F.nth(hs, 15n) : U32) : U32}
-  %nth_correct(hs, 15n) : {C.next_word(hs) == (F.sigma1(C.get(hs, 1n)) + C.get(hs, 6n) + F.sigma0(C.get(hs, 14n)) + _ : U32) : U32}
-  {==}
+  match hs:
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> (p <> rest):
+      {==}
+    case Nil{}:
+      {==}
+    case a <> Nil{}:
+      {==}
+    case a <> b <> Nil{}:
+      {==}
+    case a <> b <> c <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}:
+      {==}
 
 law extension_correct:
   for +n: Nat
@@ -257,6 +287,205 @@ def compression_correct(ws, ks, s):
   Equal.cong(S.State, S.State, r => C.feedforward(s, r),
     C.rounds(ks, ws, s), F.rounds(ks, ws)(s), rounds_correct(ks, ws, s))
 
+law expanded_rounds_correct:
+  for +n: Nat
+  for +history: List<&2, U32>
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.expanded_rounds(n, history, ks, s) == C.rounds(ks, C.expand(n, history), s) : S.State}
+
+def expanded_rounds_correct(n, history, ks, s):
+  match n ks:
+    case 0n Nil{}:
+      {==}
+    case 0n k <> kt:
+      {==}
+    case 1n+p Nil{}:
+      {==}
+    case 1n+p k <> kt:
+      expanded_rounds_correct(p, C.next_word(history) <> history, kt,
+        C.step(s, k, C.next_word(history)))
+
+law schedule_rounds_correct:
+  for +ws: List<&2, U32>
+  for +extra: Nat
+  for +history: List<&2, U32>
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.schedule_rounds(ws, extra, history, ks, s) ==
+    C.rounds(ks, List.append(&2, U32, ws, C.expand(extra, history)), s) : S.State}
+
+def schedule_rounds_correct(ws, extra, history, ks, s):
+  match ws ks:
+    case Nil{} _:
+      expanded_rounds_correct(extra, history, ks, s)
+    case w <> wt Nil{}:
+      {==}
+    case w <> wt k <> kt:
+      schedule_rounds_correct(wt, extra, history, kt, C.step(s, k, w))
+
+law fused_compress_correct:
+  for +block: List<&2, U32>
+  for +extra: Nat
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.fused_compress(block, extra, ks, s) == C.compress(C.schedule(extra, block), ks, s) : S.State}
+
+law fused_compress_slow_correct:
+  for +block: List<&2, U32>
+  for +extra: Nat
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.fused_compress_slow(block, extra, ks, s) == C.compress(C.schedule(extra, block), ks, s) : S.State}
+
+def fused_compress_slow_correct(block, extra, ks, s):
+  Equal.cong(S.State, S.State, r => C.feedforward(s, r),
+    C.schedule_rounds(block, extra, List.reverse(&2, U32, block), ks, s),
+    C.rounds(ks, List.append(&2, U32, block,
+      C.expand(extra, List.reverse(&2, U32, block))), s),
+    schedule_rounds_correct(block, extra, List.reverse(&2, U32, block), ks, s))
+
+law window_rounds_correct:
+  for +q: Nat
+  for +a: U32
+  for +b: U32
+  for +c: U32
+  for +d: U32
+  for +e: U32
+  for +f: U32
+  for +g: U32
+  for +h: U32
+  for +i: U32
+  for +j: U32
+  for +k: U32
+  for +l: U32
+  for +m: U32
+  for +n: U32
+  for +o: U32
+  for +p: U32
+  for +rest: List<&2, U32>
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.window_rounds(q, C.W{a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p}, ks, s) ==
+    C.expanded_rounds(q, a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> rest, ks, s) : S.State}
+
+def window_rounds_correct(q, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, rest, ks, s):
+  match q ks:
+    case 0n Nil{}:
+      {==}
+    case 0n x <> xt:
+      {==}
+    case 1n+r Nil{}:
+      {==}
+    case 1n+r x <> xt:
+      window_rounds_correct(r,
+        (C.small1(b) + g + C.small0(o) + p : U32),
+        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p <> rest, xt,
+        C.step(s, x, (C.small1(b) + g + C.small0(o) + p : U32)))
+
+law window_schedule_rounds_correct:
+  for +ws: List<&2, U32>
+  for +extra: Nat
+  for +a: U32
+  for +b: U32
+  for +c: U32
+  for +d: U32
+  for +e: U32
+  for +f: U32
+  for +g: U32
+  for +h: U32
+  for +i: U32
+  for +j: U32
+  for +k: U32
+  for +l: U32
+  for +m: U32
+  for +n: U32
+  for +o: U32
+  for +p: U32
+  for +rest: List<&2, U32>
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.window_schedule_rounds(ws, extra, C.W{a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p}, ks, s) ==
+    C.schedule_rounds(ws, extra, a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> rest, ks, s) : S.State}
+
+def window_schedule_rounds_correct(ws, extra, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, rest, ks, s):
+  match ws ks:
+    case Nil{} _:
+      window_rounds_correct(extra, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, rest, ks, s)
+    case w <> wt Nil{}:
+      {==}
+    case w <> wt x <> xt:
+      window_schedule_rounds_correct(wt, extra, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p,
+        rest, xt, C.step(s, x, w))
+
+def fused_compress_correct(block, extra, ks, s):
+  match block:
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> Nil{}:
+      Equal.trans(S.State,
+        C.feedforward(s, C.window_schedule_rounds(
+          [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+          C.W{p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a}, ks, s)),
+        C.feedforward(s, C.schedule_rounds(
+          [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+          [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a], ks, s)),
+        C.feedforward(s, C.rounds(ks, List.append(&2, U32,
+          [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
+          C.expand(extra, [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a])), s)),
+        Equal.cong(S.State, S.State, r => C.feedforward(s, r),
+          C.window_schedule_rounds(
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+            C.W{p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a}, ks, s),
+          C.schedule_rounds(
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+            [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a], ks, s),
+          window_schedule_rounds_correct(
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+            p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a, Nil{}, ks, s)),
+        Equal.cong(S.State, S.State, r => C.feedforward(s, r),
+          C.schedule_rounds(
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+            [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a], ks, s),
+          C.rounds(ks, List.append(&2, U32,
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
+            C.expand(extra, [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a])), s),
+          schedule_rounds_correct(
+            [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], extra,
+            [p, o, n, m, l, k, j, i, h, g, f, e, d, c, b, a], ks, s)))
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> q <> rest:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> q <> rest, extra, ks, s)
+    case Nil{}:
+      fused_compress_slow_correct(Nil{}, extra, ks, s)
+    case a <> Nil{}:
+      fused_compress_slow_correct(a <> Nil{}, extra, ks, s)
+    case a <> b <> Nil{}:
+      fused_compress_slow_correct(a <> b <> Nil{}, extra, ks, s)
+    case a <> b <> c <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> Nil{}, extra, ks, s)
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}:
+      fused_compress_slow_correct(a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}, extra, ks, s)
+
 law blocks_correct:
   for +ws: List<&2, List<&2, U32>>
   for +ks: List<&2, U32>
@@ -281,6 +510,208 @@ def digest_correct(s):
     case S.H{a, b, c, d, e, f, g, h}:
       {==}
 
+law block_words_correct:
+  for +ws: List<&2, U32>
+  for +extra: Nat
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.block_words(ws, extra, ks, s) == F.blocks(F.schedules(ws, extra), ks)(s) : S.State}
+
+def block_words_correct(ws, extra, ks, s):
+  match ws:
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> p <> rest:
+      +block = {[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p] : List<&2, U32>}
+      %schedule_correct(extra, block) :
+        {C.block_words(rest, extra, ks, C.compress(C.schedule(extra, block), ks, s)) == F.blocks(F.schedules(rest, extra), ks)(F.compress(_, ks, s)) : S.State}
+      %compression_correct(C.schedule(extra, block), ks, s) :
+        {C.block_words(rest, extra, ks, C.compress(C.schedule(extra, block), ks, s)) == F.blocks(F.schedules(rest, extra), ks)(_) : S.State}
+      block_words_correct(rest, extra, ks, C.compress(C.schedule(extra, block), ks, s))
+    case Nil{}:
+      {==}
+    case a <> Nil{}:
+      {==}
+    case a <> b <> Nil{}:
+      {==}
+    case a <> b <> c <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> Nil{}:
+      {==}
+    case a <> b <> c <> d <> e <> f <> g <> h <> i <> j <> k <> l <> m <> n <> o <> Nil{}:
+      {==}
+
+law block_bytes_correct:
+  for +bytes: List<&2, U32>
+  for +extra: Nat
+  for +ks: List<&2, U32>
+  for +s: S.State
+  {C.block_bytes(bytes, extra, ks, s) == F.blocks(F.schedules(F.words(bytes), extra), ks)(s) : S.State}
+
+def block_bytes_correct(bytes, extra, ks, s):
+  match bytes:
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> b60 <> b61 <> b62 <> b63 <> rest:
+      +block = {[
+        C.pack(b0, b1, b2, b3), C.pack(b4, b5, b6, b7), C.pack(b8, b9, b10, b11), C.pack(b12, b13, b14, b15),
+        C.pack(b16, b17, b18, b19), C.pack(b20, b21, b22, b23), C.pack(b24, b25, b26, b27), C.pack(b28, b29, b30, b31),
+        C.pack(b32, b33, b34, b35), C.pack(b36, b37, b38, b39), C.pack(b40, b41, b42, b43), C.pack(b44, b45, b46, b47),
+        C.pack(b48, b49, b50, b51), C.pack(b52, b53, b54, b55), C.pack(b56, b57, b58, b59), C.pack(b60, b61, b62, b63)
+      ] : List<&2, U32>}
+      %schedule_correct(extra, block) :
+        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(F.compress(_, ks, s)) : S.State}
+      %compression_correct(C.schedule(extra, block), ks, s) :
+        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
+      %fused_compress_correct(block, extra, ks, s) :
+        {C.block_bytes(rest, extra, ks, C.fused_compress(block, extra, ks, s)) == F.blocks(F.schedules(F.words(rest), extra), ks)(_) : S.State}
+      block_bytes_correct(rest, extra, ks, C.fused_compress(block, extra, ks, s))
+    case Nil{}:
+      {==}
+    case b0 <> Nil{}:
+      {==}
+    case b0 <> b1 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> b60 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> b60 <> b61 <> Nil{}:
+      {==}
+    case b0 <> b1 <> b2 <> b3 <> b4 <> b5 <> b6 <> b7 <> b8 <> b9 <> b10 <> b11 <> b12 <> b13 <> b14 <> b15 <> b16 <> b17 <> b18 <> b19 <> b20 <> b21 <> b22 <> b23 <> b24 <> b25 <> b26 <> b27 <> b28 <> b29 <> b30 <> b31 <> b32 <> b33 <> b34 <> b35 <> b36 <> b37 <> b38 <> b39 <> b40 <> b41 <> b42 <> b43 <> b44 <> b45 <> b46 <> b47 <> b48 <> b49 <> b50 <> b51 <> b52 <> b53 <> b54 <> b55 <> b56 <> b57 <> b58 <> b59 <> b60 <> b61 <> b62 <> Nil{}:
+      {==}
+
+
 # Unlike the old theorem, there is NO arbitrary preprocessing parameter.
 # This proves the actual implementation pipeline against the independent one.
 law hash_correct:
@@ -290,11 +721,11 @@ law hash_correct:
   {C.hash(bytes, extra, ks) == F.hash(bytes, extra, ks) : List<&2, U32>}
 
 def hash_correct(bytes, extra, ks):
-  %prepare_correct(bytes, extra) :
-    {C.hash(bytes, extra, ks) == F.digest(F.blocks(_, ks)(F.initial())) : List<&2, U32>}
-  %digest_correct(F.blocks(C.prepare(bytes, extra), ks)(F.initial())) :
+  %pad_correct(bytes) :
+    {C.hash(bytes, extra, ks) == F.digest(F.blocks(F.schedules(F.words(_), extra), ks)(F.initial())) : List<&2, U32>}
+  %digest_correct(F.blocks(F.schedules(F.words(C.pad(bytes)), extra), ks)(F.initial())) :
     {C.hash(bytes, extra, ks) == _ : List<&2, U32>}
   Equal.cong(S.State, List<&2, U32>, s => C.digest(s),
-    C.blocks(C.prepare(bytes, extra), ks, C.initial()),
-    F.blocks(C.prepare(bytes, extra), ks)(C.initial()),
-    blocks_correct(C.prepare(bytes, extra), ks, C.initial()))
+    C.block_bytes(C.pad(bytes), extra, ks, C.initial()),
+    F.blocks(F.schedules(F.words(C.pad(bytes)), extra), ks)(C.initial()),
+    block_bytes_correct(C.pad(bytes), extra, ks, C.initial()))

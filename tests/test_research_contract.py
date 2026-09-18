@@ -128,6 +128,29 @@ class ContractTests(unittest.TestCase):
         for call in timing.call_args_list[1::2]:
             self.assertEqual(call.args[-2:], ('--gpu', 'off'))
 
+    def test_short_batches_trigger_calibration_not_candidate_failure(self):
+        with patch.object(benchmark, 'benchmark_once', side_effect=[benchmark.BatchTooShort('short'), {'best_bend_total_ms': 5}]) as once, contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(benchmark.benchmark()['best_bend_total_ms'], 5)
+        self.assertEqual([c.args[1] for c in once.call_args_list], [1048576, 2097152])
+
+    def test_calibration_limit_fails_without_fabricating_score(self):
+        with patch.object(benchmark, 'MAX_CORPUS_BYTES', 2 * 1048576), patch.object(benchmark, 'benchmark_once', side_effect=benchmark.BatchTooShort('short')) as once, contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(RuntimeError, 'maximum batch size'):
+                benchmark.benchmark()
+        self.assertEqual(once.call_count, 2)
+
+    def test_short_batch_still_checks_every_digest(self):
+        with self.assertRaisesRegex(RuntimeError, 'digest'):
+            benchmark.parse_native('BENCH_MS=5\nwrong', [bytes(32)])
+        with self.assertRaises(benchmark.BatchTooShort):
+            benchmark.parse_native('BENCH_MS=5\n' + bytes(32).hex(), [bytes(32)])
+
+    def test_native_normalization_retains_raw_samples(self):
+        with patch.object(benchmark, 'run', return_value='BENCH_MS=80\n' + bytes(32).hex()):
+            value = benchmark.native_samples(Path('/unused'), {'SHA_BENCH_BYTES': str(8 * 1048576)}, [bytes(32)])
+        self.assertEqual(value['median_ms'], 10)
+        self.assertEqual(value['raw_samples_ms'], [80] * 5)
+
     def test_native_every_digest_checked(self):
         expected = [bytes.fromhex('ab' * 32), bytes.fromhex('cd' * 32)]
         good = 'BENCH_MS=100\n' + '\n'.join(x.hex() for x in reversed(expected))

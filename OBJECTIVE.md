@@ -37,7 +37,13 @@ The final stdout line is JSON. The score is `best_bend_total_ms`: for each Bend
 execution mode, sum its median batch times across 64-, 1,024-, 16,384-, and
 65,536-byte messages. Select the lowest complete-suite total across sequential
 CPU and parallel CPU. Do not mix the best per-size samples from different modes. Each
-workload hashes exactly 1 MiB of deterministic runtime-loaded binary data.
+workload initially hashes 1 MiB of deterministic runtime-loaded binary data.
+If any native warmup or sample takes less than 20 ms, the trusted harness doubles
+the corpus for ALL workloads and modes and retries the entire suite, up to
+64 MiB per workload. Short timing is a calibration signal, not evidence against
+an optimization. Never abandon a faster architecture for triggering calibration.
+All reported score times are normalized to 1 MiB; raw sample times, actual corpus
+size and digest checks are retained. Use only the final complete calibrated report.
 Each has an untimed warmup and five measured samples; every digest is checked.
 Autoresearch repeats the complete benchmark three times and compares medians.
 
@@ -51,7 +57,8 @@ Optional GPU diagnostics from manual runs cannot affect acceptance.
 
 Compilation, process startup, file loading, message chunking, hex conversion and
 output are excluded. Hashing, digest production and result retention are timed.
-Do not change batching, timers, compiler flags, runtime, environment, or inputs.
+Do not change the trusted calibration policy, timers, compiler flags, runtime,
+environment, or inputs. Harness-controlled batch scaling is permitted.
 
 ## Formal correctness is a hard gate
 

@@ -223,7 +223,7 @@ claim to have exhausted every SHA-256 library. Python's
 its native/OpenSSL-backed hash implementations.
 
 All backends hash identical deterministic binary inputs. Each workload processes
-1 MiB, split into 64-, 1,024-, 16,384-, or 65,536-byte messages. The native driver
+an initially 1 MiB corpus, split into 64-, 1,024-, 16,384-, or 65,536-byte messages. The native driver
 loads and constructs the inputs before starting its clock, invokes the actual
 public Bend function, retains every digest, stops the clock, then prints results.
 Python verifies every native digest and every Python result against hashlib.
@@ -244,7 +244,13 @@ not imply that Bend's GPU compiler/runtime has been formally verified.
 Each Bend mode has one unrecorded run and five recorded process runs per size.
 Each run measures a fresh batch; this is not repeated use of a persistent process.
 Bend's millisecond clock requires at least 20 ms per batch; unresolved batches
-fail rather than reporting zero. Python calibrates repeated batches to at least
+trigger a retry with twice the corpus for every mode and workload, up to 64 MiB.
+Schema 3 reports actual corpus sizes and raw measurements, with score times
+normalized to 1 MiB. This avoids rejecting a correct implementation for being
+faster than the original timer-resolution floor. Timings below the floor never
+become accepted raw samples. Larger batches can alter parallel occupancy, so
+cross-size comparisons require care and matched-size evidence for marginal gains.
+Python calibrates repeated batches to at least
 50 ms and uses `perf_counter_ns`. Raw samples, library/tool versions, device
 identity, corpus hash and per-size winners are included in the final JSON line.
 Readable progress goes to stderr. Save a report with `--output report.json`.
@@ -334,3 +340,18 @@ accepted improvement. The static contract checks and orchestrator add defenses;
 they are not a proof of the orchestration software or a hostile-code sandbox.
 The formal claim remains exactly the trust boundary described above and in
 [CORRECTNESS.md](CORRECTNESS.md).
+
+### Rolling-window implementation
+
+The current implementation fuses schedule generation with compression and stores
+schedule history in a fixed 16-word internal datatype. Its supporting proofs
+establish equivalence to the unchanged independent specification. The public
+list-based word and byte APIs remain unchanged.
+
+A matched-size diagnostic compared it with the previously approved fused-list
+implementation on 8 MiB per workload. Median parallel suite totals were 946 ms
+and 192 ms, respectively, a 4.93x speedup. Every measured batch exceeded 20 ms;
+every output was checked. Full research validation passed, including universal
+proofs and mutation rejection. These diagnostics ran alongside the research
+worker and are not an orchestrator approval. See
+[measurements and method](benchmarks/rolling_window_evidence.json).

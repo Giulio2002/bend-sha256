@@ -47,7 +47,7 @@ def main() -> IO(Unit):
     size_text : String <- IO.try(String, IO.get_env("SHA_BENCH_SIZE"))
     +size : Nat <- number(Nat.read(size_text))
     file : File <- IO.try(File, File.open(path, "r"))
-    pair : File & Result<&1, &1, U32 & String, List<&2, U32>> <- File.read_bytes(file, 16777216)
+    pair : File & Result<&1, &1, U32 & String, List<&2, U32>> <- File.read_bytes(file, 67108864)
     bytes : List<&2, U32> <- loaded(pair)
     inputs : List<&2, List<&2, U32>> = chunks(bytes, size, size, Nil{}, Nil{})
     start : Nat <- IO.now()

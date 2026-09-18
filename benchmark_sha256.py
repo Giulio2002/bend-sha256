@@ -28,6 +28,11 @@ SIZES = (64, 1024, 16384, 65536)
 CORPUS_BYTES = 1024 * 1024
 SAMPLES = 5
 SEED = 2562026
+MAX_CORPUS_BYTES = 64 * 1024 * 1024
+
+
+class BatchTooShort(RuntimeError):
+    pass
 
 
 def run(command, *, env=None, timeout=300):
@@ -59,12 +64,12 @@ def parse_native(output, expected):
     if not lines or not lines[0].startswith("BENCH_MS="):
         raise RuntimeError("Native benchmark did not emit its timing record")
     elapsed = int(lines[0].removeprefix("BENCH_MS="))
-    if elapsed < 20:
-        raise RuntimeError("Native batch below 20 ms; millisecond timer cannot resolve this workload reliably")
     # The accumulator returns messages in reverse order. Check EVERY digest.
     wanted = [digest.hex() for digest in reversed(expected)]
     if lines[1:] != wanted:
         raise RuntimeError("Native digest count/order/content mismatch; no score is valid")
+    if elapsed < 20:
+        raise BatchTooShort("Native batch below 20 ms; retry with a larger corpus")
     return elapsed
 
 
@@ -114,10 +119,25 @@ def native_samples(binary, native_env, expected, *options):
     command = [str(binary), *options]
     parse_native(run(command, env=native_env), expected)
     samples = [parse_native(run(command, env=native_env), expected) for _ in range(SAMPLES)]
-    return {"median_ms": statistics.median(samples), "samples_ms": samples}
+    scale = int(native_env.get("SHA_BENCH_BYTES", CORPUS_BYTES)) / CORPUS_BYTES
+    normalized = [sample / scale for sample in samples]
+    return {"median_ms": statistics.median(normalized), "samples_ms": normalized,
+            "raw_samples_ms": samples, "corpus_scale": scale}
 
 
 def benchmark(gpu_mode="off"):
+    corpus_bytes = CORPUS_BYTES
+    while True:
+        try:
+            return benchmark_once(gpu_mode, corpus_bytes)
+        except BatchTooShort:
+            if corpus_bytes >= MAX_CORPUS_BYTES:
+                raise RuntimeError("Timer resolution still insufficient at maximum batch size; no score")
+            corpus_bytes *= 2
+            print(f"Short batch: retrying all modes with {corpus_bytes // 1048576} MiB per workload", file=sys.stderr, flush=True)
+
+
+def benchmark_once(gpu_mode, corpus_bytes):
     backends = python_backends()  # Require all three, never silently skip a missing competitor.
     env = {**os.environ, "BEND_NO_TELEMETRY": "1"}
     version = run(["bend", "--version"], env=env).strip()
@@ -127,8 +147,9 @@ def benchmark(gpu_mode="off"):
     if gpu_mode == "required" and not hardware["available"]:
         raise RuntimeError("GPU required but unavailable: " + hardware.get("reason", "No Metal device"))
     report = {
-        "schema": 2, "scored_modes": ["sequential_cpu", "parallel_cpu"], "metric": "best_bend_total_ms", "samples_per_workload": SAMPLES,
-        "seed": SEED, "corpus_bytes_per_workload": CORPUS_BYTES,
+        "schema": 3, "scored_modes": ["sequential_cpu", "parallel_cpu"], "metric": "best_bend_total_ms", "samples_per_workload": SAMPLES,
+        "seed": SEED, "corpus_bytes_per_workload": corpus_bytes,
+        "normalization_bytes": CORPUS_BYTES, "minimum_raw_batch_ms": 20,
         "environment": {"python": sys.version, "platform": platform.platform(),
                         "machine": platform.machine(), "bend": version,
                         "openssl_hashlib": ssl.OPENSSL_VERSION,
@@ -152,22 +173,30 @@ def benchmark(gpu_mode="off"):
         gpu_binary = temp / "gpu-native"
         print("Building native Bend parallel benchmark (outside timing)", file=sys.stderr, flush=True)
         run(["bend", "benchmarks/gpu_driver.bend", "-o", str(gpu_binary)], env=env)
-        corpus = random.Random(SEED).randbytes(CORPUS_BYTES)
+        corpus = random.Random(SEED).randbytes(corpus_bytes)
         data_file = temp / "corpus.bin"
         data_file.write_bytes(corpus)
         report["corpus_sha256"] = hashlib.sha256(corpus).hexdigest()
         for size in SIZES:
             messages = [corpus[offset:offset + size] for offset in range(0, len(corpus), size)]
             expected = [hashlib.sha256(message).digest() for message in messages]
-            native_env = {**env, "SHA_BENCH_INPUT": str(data_file), "SHA_BENCH_SIZE": str(size)}
-            native = native_samples(binary, native_env, expected)["samples_ms"]
+            native_env = {**env, "SHA_BENCH_INPUT": str(data_file), "SHA_BENCH_SIZE": str(size),
+                          "SHA_BENCH_BYTES": str(corpus_bytes)}
+            native_result = native_samples(binary, native_env, expected)
+            native = native_result["samples_ms"]
             references = {name: measure_python(function, messages, expected)
                           for name, function in backends.items()}
+            scale = corpus_bytes / CORPUS_BYTES
+            for reference in references.values():
+                reference["raw_samples_ms"] = list(reference["samples_ms"])
+                reference["samples_ms"] = [value / scale for value in reference["samples_ms"]]
+                reference["median_ms"] /= scale
             winner = min(references, key=lambda key: references[key]["median_ms"])
             bend_ms = statistics.median(native)
             python_ms = references[winner]["median_ms"]
             item = {"message_bytes": size, "messages": len(messages), "bend_ms": bend_ms,
-                    "bend_samples_ms": native, "python": references,
+                    "bend_samples_ms": native,
+                    "bend_raw_samples_ms": native_result.get("raw_samples_ms", native), "python": references,
                     "fastest_python": winner, "fastest_python_ms": python_ms,
                     "bend_over_python": bend_ms / python_ms,
                     "bend_mib_per_second": CORPUS_BYTES / 1048576 / (bend_ms / 1000)}

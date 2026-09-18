@@ -1,0 +1,282 @@
+{
+  "date": "2026-09-18",
+  "method": "Matched 8 MiB per workload, four message sizes, parallel CPU, three suites per implementation; each workload one warmup and three measured samples. Variant order alternated. Every digest checked against hashlib.",
+  "caveat": "Active research process was left running; concurrent load can affect timings. These are diagnostic measurements, not a new orchestrator approval.",
+  "baseline": "Previously approved fused compressor, 155 ms on old 1 MiB suite",
+  "candidate": "Recovered fixed 16-word rolling window plus fused compression; full research validation passed",
+  "results": [
+    {
+      "corpus_mib": 8,
+      "repeat": 0,
+      "variant": "baseline",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            364,
+            356,
+            362
+          ],
+          "median_ms": 362
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            198,
+            191,
+            199
+          ],
+          "median_ms": 198
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            187,
+            201,
+            217
+          ],
+          "median_ms": 201
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            177,
+            185,
+            189
+          ],
+          "median_ms": 185
+        }
+      ],
+      "total_ms": 946
+    },
+    {
+      "corpus_mib": 8,
+      "repeat": 0,
+      "variant": "candidate",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            83,
+            81,
+            80
+          ],
+          "median_ms": 81
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            38,
+            37,
+            37
+          ],
+          "median_ms": 37
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            33,
+            33,
+            34
+          ],
+          "median_ms": 33
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            36,
+            36,
+            40
+          ],
+          "median_ms": 36
+        }
+      ],
+      "total_ms": 187
+    },
+    {
+      "corpus_mib": 8,
+      "repeat": 1,
+      "variant": "candidate",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            83,
+            78,
+            87
+          ],
+          "median_ms": 83
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            38,
+            38,
+            38
+          ],
+          "median_ms": 38
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            36,
+            33,
+            35
+          ],
+          "median_ms": 35
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            37,
+            36,
+            36
+          ],
+          "median_ms": 36
+        }
+      ],
+      "total_ms": 192
+    },
+    {
+      "corpus_mib": 8,
+      "repeat": 1,
+      "variant": "baseline",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            375,
+            363,
+            384
+          ],
+          "median_ms": 375
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            204,
+            214,
+            202
+          ],
+          "median_ms": 204
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            192,
+            182,
+            195
+          ],
+          "median_ms": 192
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            184,
+            183,
+            180
+          ],
+          "median_ms": 183
+        }
+      ],
+      "total_ms": 954
+    },
+    {
+      "corpus_mib": 8,
+      "repeat": 2,
+      "variant": "baseline",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            376,
+            357,
+            378
+          ],
+          "median_ms": 376
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            187,
+            198,
+            192
+          ],
+          "median_ms": 192
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            181,
+            178,
+            180
+          ],
+          "median_ms": 180
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            189,
+            198,
+            178
+          ],
+          "median_ms": 189
+        }
+      ],
+      "total_ms": 937
+    },
+    {
+      "corpus_mib": 8,
+      "repeat": 2,
+      "variant": "candidate",
+      "mode": "parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "samples_ms": [
+            96,
+            92,
+            104
+          ],
+          "median_ms": 96
+        },
+        {
+          "message_bytes": 1024,
+          "samples_ms": [
+            50,
+            40,
+            42
+          ],
+          "median_ms": 42
+        },
+        {
+          "message_bytes": 16384,
+          "samples_ms": [
+            36,
+            36,
+            35
+          ],
+          "median_ms": 36
+        },
+        {
+          "message_bytes": 65536,
+          "samples_ms": [
+            40,
+            41,
+            40
+          ],
+          "median_ms": 40
+        }
+      ],
+      "total_ms": 214
+    }
+  ],
+  "baseline_median_total_ms": 946,
+  "candidate_median_total_ms": 192,
+  "speedup": 4.927083333333333
+}
