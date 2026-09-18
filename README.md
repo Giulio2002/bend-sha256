@@ -314,7 +314,7 @@ the same scoring rule. The benchmark, including mandatory GPU
 checks, is repeated three times. Acceptance requires more than 3 percent gain
 and an independent orchestrator approval based on code, proofs, measurements
 and previous runs. The orchestrator verifies all mode totals and the winning mode.
-The default budget is three consecutive misses, at most eight attempts.
+The loop stops after three consecutive misses, with no total iteration cap.
 
 The source checkout is never edited by the loop. Runs, temporary directories,
 agent events, exposed reasoning summaries and review evidence are retained under

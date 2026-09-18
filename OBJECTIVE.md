@@ -15,7 +15,7 @@ validation = ["uv", "run", "--frozen", "python", "research_validate.py"]
 metric = "best_bend_total_ms"
 direction = "min"
 patience = 3
-max_iterations = 8
+max_iterations = 0
 repeats = 3
 min_delta = 0.0
 min_relative_delta = 0.03
@@ -92,6 +92,6 @@ fails, repair the proof within scope or abandon the change.
 
 An independent read-only orchestrator must approve each measured improvement.
 A gain must exceed 3 percent. Stop after three consecutive attempts without an
-approved improvement, with an absolute cap of eight attempts. Keep all failures
+approved improvement, with no total iteration cap. Keep all failures
 and review reasons. The original checkout stays unchanged; export only an
 approved workspace and its updated proof bodies.
