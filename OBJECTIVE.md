@@ -111,6 +111,23 @@ Preserve the public API and prove the new implementation equivalent to the
 unchanged independent specification for every input. You may replace the entire
 supporting lemma structure and public proof implementations to establish this.
 
+Prioritize fundamental improvements over local tuning. Before choosing an
+experiment, inspect the current architecture and previous measured attempts for
+credible larger opportunities: internal data representation, fixed-size or
+rolling schedule state, fusion of schedule generation and compression, memory
+allocation, and redundant whole-input work. If a plausibly faster architecture
+is available within the trust boundary, prioritize implementing it, including a
+full rewrite and replacement of supporting proofs when needed. Do not prefer a
+small patch merely because its proof is easier or it preserves existing code.
+
+Small improvements are a fallback. Before selecting one, explicitly identify
+the fundamental alternatives considered and explain, with code, measurements,
+compiler capabilities or concrete proof obstacles, why none currently offers a
+credible achievable improvement. Lack of investigation is not evidence that no
+fundamental improvement exists. Do not claim a rewrite is faster until the
+independent benchmark establishes it. A rewrite is not required for its own sake:
+retain the best proved and measured implementation when an alternative loses.
+
 Choose a coherent performance hypothesis, even when realizing it requires a
 full rewrite. There is no preference for small diffs or preserving the current
 architecture. Complete the rewrite and its proofs before submitting; partial
