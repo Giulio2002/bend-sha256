@@ -167,9 +167,11 @@ The completed local run used Bend 2.0.5:
 Specification independence: only Base and the neutral state datatype imported
 Universal correctness theorem: All terms check.
 Bend proofs: All terms check.
-Universal proof mutation checks: 12 algorithm defects rejected without test vectors
-JS: 182 SHA-256 cases passed
-Native: 182 SHA-256 cases passed
+Universal proof mutation checks: 15 algorithm defects rejected without test vectors
+JS words: 182 SHA-256 cases passed
+JS bytes (32 octets, each 0..255): 182 SHA-256 cases passed
+Native words: 182 SHA-256 cases passed
+Native bytes (32 octets, each 0..255): 182 SHA-256 cases passed
 ```
 
 The 182 execution cases comprise four fixed standard vectors, 141 lengths and
@@ -285,10 +287,10 @@ it is measured. This gate checks:
 - unchanged supporting law statements and imports, with no unsafe code, holes,
   foreign imports, effects or overrides of trusted definitions;
 - the universal theorem and all four concrete digest proofs;
-- all 182 differential cases on both JS and native CPU backends;
+- all 182 differential cases for each API on both JS and native CPU backends;
 - three type-correct public API mutations that the universal proof must reject.
 
-The original 12 implementation-text mutations still run with
+The existing 15 implementation-text mutations still run with
 `uv run --frozen python test_sha256.py --native`. Their textual anchors can
 legitimately disappear during optimization, so the research gate uses structural
 public-wrapper mutations instead: zero digest, prepended byte, and reversed

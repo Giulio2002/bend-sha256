@@ -1,13 +1,13 @@
 {
   "version": 1,
   "frozen_sha256": {
-    "fips.bend": "a1633fe06d34986d06421a08e2f6fd51f6fe2e5ff727501d97ead220cae85db7",
+    "fips.bend": "f11c04cc7e6c319ead48623f73ffb7353fedf3f8ce8751b9330be27aad541ba8",
     "state.bend": "24b4bb267fe94bd1615a8cff6aa090fff766c9009b5f9aa1c08a865b87d06230",
-    "LAWS.bend": "5c5efb576f49e35f0c4a18df4e8df406499cd8d815806ee8d8c1828ea0df98d5",
-    "CORRECTNESS.bend": "64eb7ea457616ca363a5f9e5aff44883cdebd1c852f332ec75c3029684eef124",
+    "LAWS.bend": "a18ba4a1d2632b5b3c20ef265e958bfae3d2af05aa1b8db853a610e63d7a57be",
+    "CORRECTNESS.bend": "53514f078f2eb3a81cce74f831316ee043a70886562080b99e02671a0a85036b",
     "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
-    "test_sha256.py": "85946378bd3867a1b0963cdb21087a12e32a543b1d31d816f299d4e63ef9337f",
-    "research_validate.py": "4f4ff68953de3cebaa394698669a0ba1e55de27717bb9652b9784ba2cc4f99e2",
+    "test_sha256.py": "42a776a9fbb91d59f06ba9a633ff26306bfc7e5677935a36d9b248a5c764db5d",
+    "research_validate.py": "6a6f3234e24a93b23738a6972748dd46d62e904e6b7d0bec293315ddb577fcb8",
     "benchmark_sha256.py": "8d01eaffbfb7c2081966b6045fac688e8127617d14b11fde9ddfb95755b3e9b0",
     "benchmarks/driver.bend": "7f3a23118f3719786373de925adeb62c8e4aaea8958af86b51e5737c77c1c3bd",
     "pyproject.toml": "527cafbfc3af4b1ef0c33939a95eb0bc4f985ce2f7ecf5cfd61fb8f61408f334",

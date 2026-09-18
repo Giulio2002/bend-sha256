@@ -94,7 +94,7 @@ def main():
     # This executes both CORRECTNESS and PROOF, plus all 182 cases on both backends.
     print(checked([sys.executable, "test_sha256.py", "--native", "--skip-mutations"]), end="", flush=True)
     public_mutations()
-    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 JS/native cases, 3 rejected public mutations", flush=True)
+    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 cases per API on JS/native, 3 rejected public mutations", flush=True)
 
 
 if __name__ == "__main__":

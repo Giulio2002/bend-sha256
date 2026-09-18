@@ -4,6 +4,8 @@ Optimize the native Bend implementation of SHA-256. Preserve the public API's
 behavior for every `List<&2, U32>`: each element contributes its low eight bits
 and the result is the eight SHA-256 digest words in order. Preserve the existing
 unconditional theorem `Laws.sha256_correct` against the independent `fips.bend`.
+Also preserve the public 32-byte digest API and all its serialization, correctness
+and length theorems. The benchmark measures the eight-word API.
 
 ```toml
 name = "SHA-256 / PROOF-PRESERVING NATIVE OPTIMIZATION"
@@ -31,9 +33,10 @@ ignore = []
 
 Run `uv run --frozen python research_validate.py` before benchmarking. Any failure
 rejects the candidate. Then run `uv run --frozen python benchmark_sha256.py --gpu required`.
-The final stdout line is JSON. The score is `best_bend_total_ms`: for each Bend execution mode, sum its median
-batch times across 64-, 1,024-, 16,384-, and 65,536-byte messages. Select the lowest complete-suite total across sequential CPU, parallel CPU and
-GPU. Do not mix the best per-size samples from different modes. Each
+The final stdout line is JSON. The score is `best_bend_total_ms`: for each Bend
+execution mode, sum its median batch times across 64-, 1,024-, 16,384-, and
+65,536-byte messages. Select the lowest complete-suite total across sequential
+CPU, parallel CPU and GPU. Do not mix the best per-size samples from different modes. Each
 workload hashes exactly 1 MiB of deterministic runtime-loaded binary data.
 Each has an untimed warmup and five measured samples; every digest is checked.
 Autoresearch repeats the complete benchmark three times and compares medians.
@@ -45,7 +48,8 @@ The GPU check is mandatory on this Metal-capable machine. It also measures the
 same proved public hash on a balanced parallel message tree, once with GPU
 forced off and once with GPU forced on. Every GPU digest is checked. GPU and
 parallel CPU totals are reported separately; the optimization metric is the
-fastest complete-suite Bend mode, which may change between candidates. No CPU fallback may be labeled a GPU result.
+fastest complete-suite Bend mode, which may change between candidates. No CPU
+fallback may be labeled a GPU result.
 
 Compilation, process startup, file loading, message chunking, hex conversion and
 output are excluded. Hashing, digest production and result retention are timed.
@@ -66,7 +70,7 @@ theorem, universal gate, fixed-vector proofs, checker or dependencies. Do not
 weaken a statement, add assumptions or new laws, use holes or unsafe annotations,
 introduce foreign code, override imported definitions, or bypass termination.
 
-The original 12 text-based mutation checks in `test_sha256.py` still run by
+The existing 15 text-based mutation checks in `test_sha256.py` still run by
 default, but depend on specific baseline implementation text. The research gate
 uses structural public-wrapper mutations so valid refactors can remove those
 textual anchors without losing negative proof checks.
