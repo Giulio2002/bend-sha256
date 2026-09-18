@@ -178,3 +178,19 @@ def constants() -> List<&2, U32>:
 
 def sha256(bytes: List<&2, U32>) -> List<&2, U32>:
   hash(bytes, 48n, constants())
+
+# FIPS digest serialization: most significant octet of each word first.
+def word_octets(+w: U32) -> List<&2, U32>:
+  [U32.and(U32.shrn(w, 24n), 255),
+   U32.and(U32.shrn(w, 16n), 255),
+   U32.and(U32.shrn(w, 8n), 255), U32.and(w, 255)]
+
+def digest_octets(ws: List<&2, U32>) -> List<&2, U32>:
+  match ws:
+    case Nil{}:
+      Nil{}
+    case w <> tail:
+      List.append(&2, U32, word_octets(w), digest_octets(tail))
+
+def sha256_bytes(bytes: List<&2, U32>) -> List<&2, U32>:
+  digest_octets(sha256(bytes))

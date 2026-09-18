@@ -4,9 +4,11 @@ Command: python3 -u test_sha256.py --native
 Specification independence: only Base and the neutral state datatype imported
 Universal correctness theorem: All terms check.
 Bend proofs: All terms check.
-Universal proof mutation checks: 12 algorithm defects rejected without test vectors
-JS: 182 SHA-256 cases passed
-Native: 182 SHA-256 cases passed
+Universal proof mutation checks: 15 algorithm defects rejected without test vectors
+JS words: 182 SHA-256 cases passed
+JS bytes (32 octets, each 0..255): 182 SHA-256 cases passed
+Native words: 182 SHA-256 cases passed
+Native bytes (32 octets, each 0..255): 182 SHA-256 cases passed
 
 Universal theorem gate (no concrete test vectors): bend CORRECTNESS.bend
 Public statement: LAWS.sha256_correct
@@ -14,3 +16,9 @@ Public statement: LAWS.sha256_correct
   SHA.sha256(bytes) == FIPS.sha256(bytes)
 
 Scope and trust assumptions: CORRECTNESS.md
+
+Byte API statements checked by the same universal gate:
+  LAWS.sha256_bytes_correct:
+    SHA.sha256_bytes(bytes) == FIPS.sha256_bytes(bytes)
+  LAWS.sha256_bytes_length:
+    List.length(SHA.sha256_bytes(bytes)) == 32

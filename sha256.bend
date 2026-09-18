@@ -30,3 +30,17 @@ def ascii(s: String) -> List<&2, U32>:
 
 def hex(ws: List<&2, U32>) -> String:
   Core.hex(ws)
+
+# Big-endian octets, represented as U32 values in 0..255.
+def digest_bytes(ws: List<&2, U32>) -> List<&2, U32>:
+  match ws:
+    case Nil{}:
+      Nil{}
+    case +w <> tail:
+      U32.and(U32.shrn(w, 24n), 255) <>
+      U32.and(U32.shrn(w, 16n), 255) <>
+      U32.and(U32.shrn(w, 8n), 255) <>
+      U32.and(w, 255) <> digest_bytes(tail)
+
+def sha256_bytes(bytes: List<&2, U32>) -> List<&2, U32>:
+  digest_bytes(sha256(bytes))

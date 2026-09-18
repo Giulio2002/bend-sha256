@@ -59,8 +59,8 @@ arithmetic. `padding_proof.bend` proves their equivalence for every Nat.
 The specification's list traversals are direct recursion; the implementation's
 large-input traversals use accumulators. Their equivalence is proved by induction.
 
-The proof gate contains 30 checked laws: 21 algorithm lemmas, six generic list/
-Nat lemmas, one padding-arithmetic lemma, and two public claims. There are no
+The proof gate contains 34 checked laws: 21 algorithm lemmas, six generic list/
+Nat lemmas, one padding-arithmetic lemma, and six serialization/public claims. There are no
 holes, `@unsafe` definitions, or added axioms. See [CORRECTNESS.md](CORRECTNESS.md) for the proof
 structure, specification mapping, and trust boundary.
 
@@ -125,8 +125,8 @@ not a streaming or performance-tuned library.
 
 The universal gate checks independently of test vectors. The test harness also
 checks four exact digest proofs, compares 182 cases on JS and native C with
-fixed standard digests/Python hashlib, and deliberately introduces 12 defects.
-The **universal proof alone** rejects all 12, including padding, length encoding,
+fixed standard digests/Python hashlib, and deliberately introduces 15 defects.
+The **universal proof alone** rejects all 15, including padding, length encoding,
 byte order, schedule indices, sigma functions, initial state, and constants.
 The execution suite includes every length 0-129, longer block boundaries,
 all byte values, random binary messages, and the million-`a` vector.

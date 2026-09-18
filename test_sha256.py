@@ -45,8 +45,8 @@ def cases():
     return result
 
 
-def verify(lines, expected, backend):
-    actual = [s for s in lines.splitlines() if len(s) == 64 and all(c in "0123456789abcdef" for c in s)]
+def verify(lines, expected, backend, width=64):
+    actual = [s for s in lines.splitlines() if len(s) == width and all(c in "0123456789abcdef" for c in s)]
     assert len(actual) == len(expected), (backend, len(actual), len(expected), lines[-500:])
     for i, (got, want) in enumerate(zip(actual, expected)):
         assert got == want, f"{backend} case {i}: {got} != {want}"
@@ -80,6 +80,9 @@ def check_rejected_mutations():
         ("round sigma", "core.bend", "rotr(x, 2n)", "rotr(x, 1n)", "step_correct"),
         ("initial state", "core.bend", "1779033703", "1779033704", "hash_correct"),
         ("digest order", "core.bend", "[a, b, c, d, e, f, g, h]", "[b, a, c, d, e, f, g, h]", "digest_correct"),
+        ("digest byte order", "sha256.bend", "U32.shrn(w, 24n)", "U32.shrn(w, 16n)", "digest_bytes_correct"),
+        ("digest byte mask", "sha256.bend", "U32.and(w, 255) <> digest_bytes", "U32.and(w, 127) <> digest_bytes", "digest_bytes_correct"),
+        ("digest byte omitted", "sha256.bend", "U32.and(w, 255) <> digest_bytes(tail)", "digest_bytes(tail)", "digest_bytes_correct"),
     ]
     for label, filename, old, new, location in mutations:
         with tempfile.TemporaryDirectory(prefix="bend-sha256-mutation-") as tmp:
@@ -128,15 +131,21 @@ def main():
     source += "def main() -> IO(Unit):\n  do IO<Unit>:\n"
     for data in expressions:
         source += f"    IO.print(SHA.hex(SHA.sha256({data})))\n"
+        source += f"    IO.print(SHA.hex(SHA.sha256_bytes({data})))\n"
     with tempfile.TemporaryDirectory(prefix=".test-", dir=ROOT) as tmp:
         driver = Path(tmp) / "vectors.bend"
         driver.write_text(source)
         expected = [digest for _, digest in vectors]
-        verify(run(["bend", str(driver)], timeout=300), expected, "JS")
+        byte_expected = ["".join(f"{b:08x}" for b in bytes.fromhex(d)) for d in expected]
+        output = run(["bend", str(driver)], timeout=300)
+        verify(output, expected, "JS words")
+        verify(output, byte_expected, "JS bytes (32 octets, each 0..255)", 256)
         if args.native:
             binary = Path(tmp) / "vectors"
             run(["bend", str(driver), "-o", str(binary)], timeout=300)
-            verify(run([str(binary)], timeout=300), expected, "Native")
+            output = run([str(binary)], timeout=300)
+            verify(output, expected, "Native words")
+            verify(output, byte_expected, "Native bytes (32 octets, each 0..255)", 256)
 
 
 if __name__ == "__main__":

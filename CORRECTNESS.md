@@ -100,10 +100,10 @@ proofs, and compares 182 JS/native digest executions against fixed standard
 vectors and Python hashlib. The execution cases include padding boundaries,
 binary bytes, randomized messages, and the standard million-`a` message.
 
-Twelve negative checks mutate one implementation detail at a time: round
+Fifteen negative checks mutate one implementation detail at a time: round
 arithmetic, a table entry, the padding marker, the padding zero count, byte count,
 length encoding, byte order, schedule index, schedule sigma, round sigma, initial
-state, and digest order. Each is rejected by `CORRECTNESS.bend`, which does not
+state, digest order, output byte order, output byte masking, and omission of an output byte. Each is rejected by `CORRECTNESS.bend`, which does not
 import the concrete-vector proof module. Thus those rejections exercise the
 universal conformance proof itself.
 
@@ -122,6 +122,25 @@ of SHA-256.
 
 The API hashes low-eight-bit interpretations of its U32 inputs. FIPS conformance
 is for byte-aligned messages; this API does not accept fractional-byte messages.
-The theorem concerns eight-word digests, not the `ascii`/`hex` presentation helpers.
+The theorems cover eight-word and 32-byte digests, not the `ascii`/`hex` presentation helpers.
 Bend execution remains subject to its 2^48−1 Nat limit and available memory; the
 implementation retains the complete message and prepared schedules in memory.
+
+## Byte digest API
+
+`SHA.sha256_bytes(bytes)` serializes the eight digest words as exactly 32
+big-endian octets, represented by U32 values. Each output masks the selected
+bits with 255. `FIPS.word_octets` independently specifies the four bytes of a
+word in decreasing significance; `FIPS.digest_octets` concatenates them.
+
+`Laws.digest_bytes_correct` proves the implementation traversal agrees with
+that specification for every word list, by induction. `Laws.sha256_bytes_correct`
+composes this with the all-input SHA-256 theorem. `digest_octets_length` proves
+serialization of every eight-word State has length 32; `Laws.sha256_bytes_length`
+transfers this result to the actual public function for every input.
+
+All 182 execution cases exercise both APIs on JS and native C. Byte results are
+compared element by element with hashlib's digest bytes, checking the length,
+order, and U32 values (including their zero high bits). Three additional negative
+checks change the output byte order, narrow a byte mask, or omit an output byte;
+the universal gate must reject each at `digest_bytes_correct`.

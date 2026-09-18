@@ -10,3 +10,15 @@ law constants_correct:
 law sha256_correct:
   for +bytes: List<&2, U32>
   {SHA.sha256(bytes) == FIPS.sha256(bytes) : List<&2, U32>}
+
+law digest_bytes_correct:
+  for +ws: List<&2, U32>
+  {SHA.digest_bytes(ws) == FIPS.digest_octets(ws) : List<&2, U32>}
+
+law sha256_bytes_correct:
+  for +bytes: List<&2, U32>
+  {SHA.sha256_bytes(bytes) == FIPS.sha256_bytes(bytes) : List<&2, U32>}
+
+law sha256_bytes_length:
+  for +bytes: List<&2, U32>
+  {List.length(&2, U32, SHA.sha256_bytes(bytes)) == 32n : Nat}
