@@ -1,0 +1,1437 @@
+{
+  "publication_reason": "plateau",
+  "deadline": "2026-09-19T00:00:00+02:00",
+  "run_id": "20260918T194829Z-b4cc8b",
+  "status": "plateau",
+  "baseline_score": 23.125,
+  "best_score": 21.375,
+  "metric": "best_bend_total_ms",
+  "iteration": 6,
+  "plateau_streak": 3,
+  "source_workspace": "iterations/0002/workspace",
+  "validation": "Full research validation passed again before publication",
+  "history": [
+    {
+      "iteration": 1,
+      "status": "infrastructure_error",
+      "score": 21.75,
+      "hypothesis": "Passing packed block words directly into the rolling compressor eliminates the remaining 16-word list allocation and recursive seed-round traversal per block.",
+      "reason": "orchestrator failed (exit 1): {'message': 'Selected model is at capacity. Please try a different model.'}. Logs: 0001/orchestrator.stderr.log",
+      "review": null
+    },
+    {
+      "iteration": 2,
+      "status": "accepted",
+      "score": 21.375,
+      "hypothesis": "Directly executing the 16 seed rounds and initializing the rolling window without a temporary block list removes per-block allocation and traversal.",
+      "reason": "The candidate preserves the unchanged universal proof contract and delivers a repeatable, mechanism-backed improvement. Median best Bend CPU time falls from 23.125 ms to 21.375 ms, a 7.57% reduction, exceeding the required 3% threshold.",
+      "review": {
+        "decision": "approve",
+        "reason": "The candidate preserves the unchanged universal proof contract and delivers a repeatable, mechanism-backed improvement. Median best Bend CPU time falls from 23.125 ms to 21.375 ms, a 7.57% reduction, exceeding the required 3% threshold.",
+        "evidence": [
+          "Only editable files `core.bend` and `conformance.bend` differ from the approved baseline. Protected specifications, public laws, benchmark/validation code, drivers, dependency lock, and trust-contract files are unchanged and their hashes match `benchmarks/proof_contract.json`.",
+          "`core.bend` adds `window_compress16`, directly executing the 16 seed rounds and initializing the existing fixed rolling window. `block_bytes` passes its 16 packed words directly, eliminating construction and traversal of the temporary block list while retaining all 64 rounds, feed-forward, and schedule expansion.",
+          "The optimization is general and contains no benchmark sizes, seeds, cached digests, external crypto, timer manipulation, skipped work, or harness-specific behavior.",
+          "The new unconditional `window_compress16_correct` law quantifies over all 16 words, expansion counts, constant lists, and states. Constant lists of at least 16 elements reduce definitionally to the same seed steps and rolling rounds as `fused_compress`; all shorter-list shapes explicitly fall back to `fused_compress`. No precondition remains to discharge.",
+          "`block_bytes_correct` now rewrites `window_compress16` through the new lemma to the former `fused_compress` pipeline, then uses `fused_compress_correct`, `schedule_correct`, and `compression_correct`. Its exhaustive incomplete-tail cases remain intact.",
+          "The public proof chain remains connected: `Laws.sha256_correct` invokes `Conformance.hash_correct`, which uses `pad_correct`, `block_bytes_correct`, and `digest_correct` to reach the independent FIPS implementation for arbitrary inputs. Packing masks every input element to its low eight bits; padding, schedule order, modular U32 arithmetic, constants, digest order, and arbitrary lengths remain covered.",
+          "All five unchanged public proof implementations remain present. Word correctness feeds `sha256_bytes_correct`; `digest_bytes_correct` proves big-endian serialization recursively; `sha256_bytes_length` proves 32-byte output; and `constants_correct` fixes the FIPS table.",
+          "`validation.stdout.log` reports the frozen trust boundary intact, universal and concrete Bend proofs checking, 182 cases passing for each word/byte API on both JS and native backends, rejection of zero-digest, prepended-byte, and reversed-digest mutations, and `RESEARCH VALIDATION PASSED`.",
+          "Both frozen drivers invoke the same public `SHA.sha256` proved by `Laws.sha256_correct`. Sequential and parallel CPU measurements are present, parallel runs use `--gpu off`, GPU is excluded, and every digest is checked against hashlib.",
+          "All six baseline/candidate reports use schema 3, Bend 2.0.5, seed 2562026, identical corpus hash, five samples per workload, and matched 8 MiB corpora. Calibration retried the complete suite until every final native raw measurement exceeded 20 ms; normalized values equal raw times divided by eight.",
+          "Candidate sequential/parallel totals are 114.125/21.375, 113.875/21.625, and 115.0/21.375 ms. Each total equals the sum of its four workload medians, and parallel CPU wins every complete suite. Baseline totals are 125.125/23.625, 124.875/22.875, and 126.25/23.125 ms.",
+          "The prescribed candidate median is 21.375 ms versus the approved baseline median of 23.125 ms: a 1.75 ms or 7.57% improvement. Even the slowest candidate report, 21.625 ms, beats the fastest baseline report, 22.875 ms, by 5.46%, placing the gain beyond observed noise.",
+          "Architecture-first requirements are satisfied by the inspected implementation and lineage: the approved baseline already uses streaming byte blocks, fused schedule/compression, fixed rotations, and a fixed 16-word rolling schedule. This candidate removes the remaining per-block list allocation and traversal from that architecture rather than choosing an isolated cosmetic tweak. Iteration 1 used the same change and failed only because the orchestrator model was unavailable, not because of a correctness or measurement rejection."
+        ],
+        "risks": [
+          "The 16-round unrolling increases generated code size and may have different performance characteristics on other Bend versions or hardware.",
+          "Formal assurance still trusts Bend's checker, Base semantics, and the independent FIPS transcription; compiler/runtime correctness, hardware, and cryptographic security are outside the proof boundary."
+        ]
+      }
+    },
+    {
+      "iteration": 3,
+      "status": "infrastructure_error",
+      "score": null,
+      "hypothesis": null,
+      "reason": "Process timed out after 1200s: codex",
+      "review": null
+    },
+    {
+      "iteration": 4,
+      "status": "rejected",
+      "score": 21.625,
+      "hypothesis": "Equivalent lower-operation Boolean formulas for SHA-256 choose and majority can reduce compression work by 128 word operations per block.",
+      "reason": "No improvement beyond configured thresholds",
+      "review": null
+    },
+    {
+      "iteration": 5,
+      "status": "failed",
+      "score": null,
+      "hypothesis": "Compressing complete input blocks before constructing padding eliminates two whole-message reversals and the full padded-message allocation; only the final 0\u201363-byte tail needs copying.",
+      "reason": "Benchmark exited 1: ne/lib/python3.12/subprocess.py\", line 1253, in _check_timeout\n    raise TimeoutExpired(\nsubprocess.TimeoutExpired: Command '['bend', 'benchmarks/gpu_driver.bend', '-o', '/Users/monkeair/bend-sha256/.autoresearch/runs/20260918T194829Z-b4cc8b/iterations/0005/benchmark-1.stdout.tmp/bend-sha256-bench-38q3njic/gpu-native']' timed out after 300 seconds\n",
+      "review": null
+    },
+    {
+      "iteration": 6,
+      "status": "failed",
+      "score": null,
+      "hypothesis": "Compressing complete input blocks before constructing padding removes two whole-message reversals and the full padded-message allocation; only the final 0\u201363-byte tail is copied.",
+      "reason": "Benchmark exited 1: ne/lib/python3.12/subprocess.py\", line 1253, in _check_timeout\n    raise TimeoutExpired(\nsubprocess.TimeoutExpired: Command '['bend', 'benchmarks/gpu_driver.bend', '-o', '/Users/monkeair/bend-sha256/.autoresearch/runs/20260918T194829Z-b4cc8b/iterations/0006/benchmark-1.stdout.tmp/bend-sha256-bench-r63g8w7b/gpu-native']' timed out after 300 seconds\n",
+      "review": null
+    }
+  ],
+  "implementation_sha256": {
+    "core.bend": "22a2d7502b7675a3cd0225ebe50cc7895a2dc1b46e0d26b9fbe2784f41d5354c",
+    "sha256.bend": "555f7eb671a3f4d422653645adac139ec74725f8a1ebe7616dde796dde898448",
+    "conformance.bend": "eba78b1391bfd0eb78f7fb6788757f9e2f4cdacd2506ffac08f642a000c2f3b8",
+    "list_proofs.bend": "cb9686ac749fae6c824b50c8307f9298ea9e9e8302253d2bd8148bb20ab72104",
+    "padding_proof.bend": "ed0f9b4069d3bb2f956adb2d3c53ebe0880cf564beffa37a53b0ea02ba622eff",
+    "CORRECTNESS.bend": "53514f078f2eb3a81cce74f831316ee043a70886562080b99e02671a0a85036b"
+  },
+  "best_measurement": {
+    "score": 21.375,
+    "samples": [
+      21.375,
+      21.625,
+      21.375
+    ],
+    "metric": "best_bend_total_ms",
+    "aggregation": "median",
+    "command": [
+      "uv",
+      "run",
+      "--frozen",
+      "python",
+      "benchmark_sha256.py",
+      "--gpu",
+      "off"
+    ]
+  },
+  "best_reports": [
+    {
+      "schema": 3,
+      "scored_modes": [
+        "sequential_cpu",
+        "parallel_cpu"
+      ],
+      "metric": "best_bend_total_ms",
+      "samples_per_workload": 5,
+      "seed": 2562026,
+      "corpus_bytes_per_workload": 8388608,
+      "normalization_bytes": 1048576,
+      "minimum_raw_batch_ms": 20,
+      "environment": {
+        "python": "3.12.12 (main, Feb  4 2026, 01:57:59) [Clang 21.1.4 ]",
+        "platform": "macOS-15.6-arm64-arm-64bit",
+        "machine": "arm64",
+        "bend": "bend 2.0.5",
+        "openssl_hashlib": "OpenSSL 3.5.5 27 Jan 2026",
+        "hashlib_constructor": "<built-in function openssl_sha256>",
+        "pycryptodome": "3.23.0",
+        "cryptography": "49.0.0"
+      },
+      "timing": "Hash batch and retain digests; exclude build, loading, chunking, startup, formatting and output",
+      "gpu": {
+        "available": false,
+        "reason": "Disabled explicitly",
+        "status": "skipped",
+        "forced_mode": "--gpu on",
+        "implementation": "The same proved SHA.sha256, parallel message tree",
+        "timing": "Host-observed batch completion, including GPU dispatch and synchronization"
+      },
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "bend_ms": 49.125,
+          "bend_samples_ms": [
+            49.125,
+            49.125,
+            49.125,
+            49.25,
+            49.625
+          ],
+          "bend_raw_samples_ms": [
+            393,
+            393,
+            393,
+            394,
+            397
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 3.1988046875,
+              "samples_ms": [
+                3.3319505,
+                3.2049193125,
+                3.1988046875,
+                3.185640625,
+                3.171724
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                26.655604,
+                25.6393545,
+                25.5904375,
+                25.485125,
+                25.373792
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 37.51345825,
+              "samples_ms": [
+                37.467864625,
+                37.51345825,
+                37.509083375,
+                37.94193225,
+                38.383296875
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                299.742917,
+                300.107666,
+                300.072667,
+                303.535458,
+                307.066375
+              ]
+            },
+            "cryptography": {
+              "median_ms": 13.505666625,
+              "samples_ms": [
+                13.5421615,
+                13.408822875,
+                13.649359375,
+                13.407864625,
+                13.505666625
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                108.337292,
+                107.270583,
+                109.194875,
+                107.262917,
+                108.045333
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 3.1988046875,
+          "bend_over_python": 15.35729899107821,
+          "bend_mib_per_second": 20.356234096692113,
+          "bend_parallel_cpu": {
+            "median_ms": 9.375,
+            "samples_ms": [
+              9.75,
+              9.0,
+              9.625,
+              9.375,
+              9.125
+            ],
+            "raw_samples_ms": [
+              78,
+              72,
+              77,
+              75,
+              73
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "bend_ms": 23.5,
+          "bend_samples_ms": [
+            23.375,
+            23.5,
+            23.625,
+            23.625,
+            23.5
+          ],
+          "bend_raw_samples_ms": [
+            187,
+            188,
+            189,
+            189,
+            188
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.5074833984375,
+              "samples_ms": [
+                0.506400390625,
+                0.5074833984375,
+                0.5085748671875,
+                0.5080904921875,
+                0.5040625
+              ],
+              "batches_per_sample": 16,
+              "raw_samples_ms": [
+                4.051203125,
+                4.0598671875,
+                4.0685989375,
+                4.0647239375,
+                4.0325
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 6.0770364375,
+              "samples_ms": [
+                6.13684375,
+                6.0473046875,
+                6.13004425,
+                6.064625,
+                6.0770364375
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                49.09475,
+                48.3784375,
+                49.040354,
+                48.517,
+                48.6162915
+              ]
+            },
+            "cryptography": {
+              "median_ms": 1.135125,
+              "samples_ms": [
+                1.141223296875,
+                1.151231765625,
+                1.134990890625,
+                1.125705078125,
+                1.135125
+              ],
+              "batches_per_sample": 8,
+              "raw_samples_ms": [
+                9.129786375,
+                9.209854125,
+                9.079927125,
+                9.005640625,
+                9.081
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.5074833984375,
+          "bend_over_python": 46.30693353192357,
+          "bend_mib_per_second": 42.5531914893617,
+          "bend_parallel_cpu": {
+            "median_ms": 4.25,
+            "samples_ms": [
+              4.25,
+              4.25,
+              4.25,
+              4.375,
+              4.375
+            ],
+            "raw_samples_ms": [
+              34,
+              34,
+              34,
+              35,
+              35
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "bend_ms": 20.75,
+          "bend_samples_ms": [
+            20.75,
+            21.0,
+            20.875,
+            20.75,
+            20.75
+          ],
+          "bend_raw_samples_ms": [
+            166,
+            168,
+            167,
+            166,
+            166
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.35167512890625,
+              "samples_ms": [
+                0.35187125390625,
+                0.3496521796875,
+                0.35167512890625,
+                0.35219075390625,
+                0.350217125
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.81497003125,
+                2.7972174375,
+                2.81340103125,
+                2.81752603125,
+                2.801737
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 4.0191354375,
+              "samples_ms": [
+                4.0268359375,
+                4.015140625,
+                4.0191354375,
+                4.0019713125,
+                4.05186975
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                32.2146875,
+                32.121125,
+                32.1530835,
+                32.0157705,
+                32.414958
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.38819091796875,
+              "samples_ms": [
+                0.38900699609375,
+                0.38792952734375,
+                0.39680908203125,
+                0.38650553515625,
+                0.38819091796875
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                3.11205596875,
+                3.10343621875,
+                3.17447265625,
+                3.09204428125,
+                3.10552734375
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.35167512890625,
+          "bend_over_python": 59.00331952542359,
+          "bend_mib_per_second": 48.192771084337345,
+          "bend_parallel_cpu": {
+            "median_ms": 3.75,
+            "samples_ms": [
+              3.75,
+              3.875,
+              3.625,
+              3.625,
+              3.875
+            ],
+            "raw_samples_ms": [
+              30,
+              31,
+              29,
+              29,
+              31
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "bend_ms": 20.75,
+          "bend_samples_ms": [
+            20.625,
+            20.75,
+            21.0,
+            20.625,
+            21.125
+          ],
+          "bend_raw_samples_ms": [
+            165,
+            166,
+            168,
+            165,
+            169
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.34389453125,
+              "samples_ms": [
+                0.34389453125,
+                0.3419469375,
+                0.34433284765625,
+                0.34546630859375,
+                0.3417150078125
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.75115625,
+                2.7355755,
+                2.75466278125,
+                2.76373046875,
+                2.7337200625
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 3.966559875,
+              "samples_ms": [
+                3.97960675,
+                3.9738125,
+                3.966559875,
+                3.9660208125,
+                3.9642395625
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                31.836854,
+                31.7905,
+                31.732479,
+                31.7281665,
+                31.7139165
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.3525696640625,
+              "samples_ms": [
+                0.352958984375,
+                0.3505631484375,
+                0.3525696640625,
+                0.354296875,
+                0.350975421875
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.823671875,
+                2.8045051875,
+                2.8205573125,
+                2.834375,
+                2.807803375
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.34389453125,
+          "bend_over_python": 60.33826686506809,
+          "bend_mib_per_second": 48.192771084337345,
+          "bend_parallel_cpu": {
+            "median_ms": 4.0,
+            "samples_ms": [
+              4.0,
+              4.0,
+              4.25,
+              4.5,
+              4.0
+            ],
+            "raw_samples_ms": [
+              32,
+              32,
+              34,
+              36,
+              32
+            ],
+            "corpus_scale": 8.0
+          }
+        }
+      ],
+      "corpus_sha256": "db62a84f070a6900a1e402ac49fef452bd1cb0cc9d8cb802c1762c5779981a1e",
+      "bend_total_ms": 114.125,
+      "python_totals_ms": {
+        "hashlib": 4.40185774609375,
+        "pycryptodome": 51.57619,
+        "cryptography": 15.38155220703125
+      },
+      "fastest_python": "hashlib",
+      "fastest_python_total_ms": 4.40185774609375,
+      "bend_over_python": 25.92655341969549,
+      "winner": "hashlib",
+      "bend_parallel_cpu_total_ms": 21.375,
+      "bend_mode_totals_ms": {
+        "sequential_cpu": 114.125,
+        "parallel_cpu": 21.375
+      },
+      "best_bend_mode": "parallel_cpu",
+      "best_bend_total_ms": 21.375,
+      "best_bend_over_python": 4.855904309712956
+    },
+    {
+      "schema": 3,
+      "scored_modes": [
+        "sequential_cpu",
+        "parallel_cpu"
+      ],
+      "metric": "best_bend_total_ms",
+      "samples_per_workload": 5,
+      "seed": 2562026,
+      "corpus_bytes_per_workload": 8388608,
+      "normalization_bytes": 1048576,
+      "minimum_raw_batch_ms": 20,
+      "environment": {
+        "python": "3.12.12 (main, Feb  4 2026, 01:57:59) [Clang 21.1.4 ]",
+        "platform": "macOS-15.6-arm64-arm-64bit",
+        "machine": "arm64",
+        "bend": "bend 2.0.5",
+        "openssl_hashlib": "OpenSSL 3.5.5 27 Jan 2026",
+        "hashlib_constructor": "<built-in function openssl_sha256>",
+        "pycryptodome": "3.23.0",
+        "cryptography": "49.0.0"
+      },
+      "timing": "Hash batch and retain digests; exclude build, loading, chunking, startup, formatting and output",
+      "gpu": {
+        "available": false,
+        "reason": "Disabled explicitly",
+        "status": "skipped",
+        "forced_mode": "--gpu on",
+        "implementation": "The same proved SHA.sha256, parallel message tree",
+        "timing": "Host-observed batch completion, including GPU dispatch and synchronization"
+      },
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "bend_ms": 49.125,
+          "bend_samples_ms": [
+            49.125,
+            49.25,
+            49.125,
+            49.125,
+            49.625
+          ],
+          "bend_raw_samples_ms": [
+            393,
+            394,
+            393,
+            393,
+            397
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 3.2025546875,
+              "samples_ms": [
+                3.26860675,
+                3.2025546875,
+                3.1965703125,
+                3.1928463125,
+                3.2411068125
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                26.148854,
+                25.6204375,
+                25.5725625,
+                25.5427705,
+                25.9288545
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 37.511453125,
+              "samples_ms": [
+                37.55981775,
+                37.566489625,
+                37.476901,
+                37.490979125,
+                37.511453125
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                300.478542,
+                300.531917,
+                299.815208,
+                299.927833,
+                300.091625
+              ]
+            },
+            "cryptography": {
+              "median_ms": 13.52175525,
+              "samples_ms": [
+                13.52175525,
+                13.858635375,
+                13.253109375,
+                13.32011975,
+                13.553348875
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                108.174042,
+                110.869083,
+                106.024875,
+                106.560958,
+                108.426791
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 3.2025546875,
+          "bend_over_python": 15.339316512452216,
+          "bend_mib_per_second": 20.356234096692113,
+          "bend_parallel_cpu": {
+            "median_ms": 9.25,
+            "samples_ms": [
+              9.625,
+              9.25,
+              9.5,
+              9.0,
+              8.875
+            ],
+            "raw_samples_ms": [
+              77,
+              74,
+              76,
+              72,
+              71
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "bend_ms": 23.375,
+          "bend_samples_ms": [
+            23.375,
+            23.5,
+            23.375,
+            23.75,
+            23.125
+          ],
+          "bend_raw_samples_ms": [
+            187,
+            188,
+            187,
+            190,
+            185
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.510181640625,
+              "samples_ms": [
+                0.5085276640625,
+                0.5107884140625,
+                0.5138678359375,
+                0.505822265625,
+                0.510181640625
+              ],
+              "batches_per_sample": 16,
+              "raw_samples_ms": [
+                4.0682213125,
+                4.0863073125,
+                4.1109426875,
+                4.046578125,
+                4.081453125
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 6.16965625,
+              "samples_ms": [
+                6.129127625,
+                6.16965625,
+                6.172796875,
+                6.13126825,
+                6.1855104375
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                49.033021,
+                49.35725,
+                49.382375,
+                49.050146,
+                49.4840835
+              ]
+            },
+            "cryptography": {
+              "median_ms": 1.168656890625,
+              "samples_ms": [
+                1.168656890625,
+                1.1862421875,
+                1.1659889375,
+                1.16548828125,
+                1.17694596875
+              ],
+              "batches_per_sample": 8,
+              "raw_samples_ms": [
+                9.349255125,
+                9.4899375,
+                9.3279115,
+                9.32390625,
+                9.41556775
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.510181640625,
+          "bend_over_python": 45.817015232779376,
+          "bend_mib_per_second": 42.780748663101605,
+          "bend_parallel_cpu": {
+            "median_ms": 4.375,
+            "samples_ms": [
+              4.375,
+              4.375,
+              4.25,
+              4.25,
+              4.375
+            ],
+            "raw_samples_ms": [
+              35,
+              35,
+              34,
+              34,
+              35
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "bend_ms": 20.875,
+          "bend_samples_ms": [
+            20.875,
+            20.625,
+            20.75,
+            21.0,
+            20.875
+          ],
+          "bend_raw_samples_ms": [
+            167,
+            165,
+            166,
+            168,
+            167
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.35040396875,
+              "samples_ms": [
+                0.348710609375,
+                0.35163020703125,
+                0.35096451953125,
+                0.3486171875,
+                0.35040396875
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.789684875,
+                2.81304165625,
+                2.80771615625,
+                2.7889375,
+                2.80323175
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 4.06385675,
+              "samples_ms": [
+                4.0517161875,
+                4.0649739375,
+                4.127466125,
+                4.0314114375,
+                4.06385675
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                32.4137295,
+                32.5197915,
+                33.019729,
+                32.2512915,
+                32.510854
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.3859619140625,
+              "samples_ms": [
+                0.38973209375,
+                0.3855712890625,
+                0.3859619140625,
+                0.385072265625,
+                0.3863645859375
+              ],
+              "batches_per_sample": 16,
+              "raw_samples_ms": [
+                3.11785675,
+                3.0845703125,
+                3.0876953125,
+                3.080578125,
+                3.0909166875
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.35040396875,
+          "bend_over_python": 59.57409693294177,
+          "bend_mib_per_second": 47.90419161676646,
+          "bend_parallel_cpu": {
+            "median_ms": 3.875,
+            "samples_ms": [
+              3.875,
+              3.875,
+              3.75,
+              3.625,
+              4.0
+            ],
+            "raw_samples_ms": [
+              31,
+              31,
+              30,
+              29,
+              32
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "bend_ms": 20.5,
+          "bend_samples_ms": [
+            20.5,
+            20.5,
+            20.5,
+            20.5,
+            20.5
+          ],
+          "bend_raw_samples_ms": [
+            164,
+            164,
+            164,
+            164,
+            164
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.3424178046875,
+              "samples_ms": [
+                0.34289144140625,
+                0.34039518359375,
+                0.3424178046875,
+                0.342524578125,
+                0.34092610546875
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.74313153125,
+                2.72316146875,
+                2.7393424375,
+                2.740196625,
+                2.72740884375
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 3.9968854375,
+              "samples_ms": [
+                4.0326614375,
+                3.922778625,
+                4.0076171875,
+                3.9695130625,
+                3.9968854375
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                32.2612915,
+                31.382229,
+                32.0609375,
+                31.7561045,
+                31.9750835
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.35019303515625,
+              "samples_ms": [
+                0.35528369140625,
+                0.35014827734375,
+                0.35014290625,
+                0.3548388671875,
+                0.35019303515625
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.84226953125,
+                2.80118621875,
+                2.80114325,
+                2.8387109375,
+                2.80154428125
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.3424178046875,
+          "bend_over_python": 59.86838219089942,
+          "bend_mib_per_second": 48.78048780487805,
+          "bend_parallel_cpu": {
+            "median_ms": 4.125,
+            "samples_ms": [
+              4.375,
+              4.125,
+              4.125,
+              4.125,
+              4.125
+            ],
+            "raw_samples_ms": [
+              35,
+              33,
+              33,
+              33,
+              33
+            ],
+            "corpus_scale": 8.0
+          }
+        }
+      ],
+      "corpus_sha256": "db62a84f070a6900a1e402ac49fef452bd1cb0cc9d8cb802c1762c5779981a1e",
+      "bend_total_ms": 113.875,
+      "python_totals_ms": {
+        "hashlib": 4.4055581015625,
+        "pycryptodome": 51.7418515625,
+        "cryptography": 15.42656708984375
+      },
+      "fastest_python": "hashlib",
+      "fastest_python_total_ms": 4.4055581015625,
+      "bend_over_python": 25.848030459435424,
+      "winner": "hashlib",
+      "bend_parallel_cpu_total_ms": 21.625,
+      "bend_mode_totals_ms": {
+        "sequential_cpu": 113.875,
+        "parallel_cpu": 21.625
+      },
+      "best_bend_mode": "parallel_cpu",
+      "best_bend_total_ms": 21.625,
+      "best_bend_over_python": 4.908572194821437
+    },
+    {
+      "schema": 3,
+      "scored_modes": [
+        "sequential_cpu",
+        "parallel_cpu"
+      ],
+      "metric": "best_bend_total_ms",
+      "samples_per_workload": 5,
+      "seed": 2562026,
+      "corpus_bytes_per_workload": 8388608,
+      "normalization_bytes": 1048576,
+      "minimum_raw_batch_ms": 20,
+      "environment": {
+        "python": "3.12.12 (main, Feb  4 2026, 01:57:59) [Clang 21.1.4 ]",
+        "platform": "macOS-15.6-arm64-arm-64bit",
+        "machine": "arm64",
+        "bend": "bend 2.0.5",
+        "openssl_hashlib": "OpenSSL 3.5.5 27 Jan 2026",
+        "hashlib_constructor": "<built-in function openssl_sha256>",
+        "pycryptodome": "3.23.0",
+        "cryptography": "49.0.0"
+      },
+      "timing": "Hash batch and retain digests; exclude build, loading, chunking, startup, formatting and output",
+      "gpu": {
+        "available": false,
+        "reason": "Disabled explicitly",
+        "status": "skipped",
+        "forced_mode": "--gpu on",
+        "implementation": "The same proved SHA.sha256, parallel message tree",
+        "timing": "Host-observed batch completion, including GPU dispatch and synchronization"
+      },
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "bend_ms": 49.375,
+          "bend_samples_ms": [
+            49.25,
+            49.125,
+            49.375,
+            50.5,
+            49.375
+          ],
+          "bend_raw_samples_ms": [
+            394,
+            393,
+            395,
+            404,
+            395
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 3.1882890625,
+              "samples_ms": [
+                3.1736640625,
+                3.17115625,
+                3.1995546875,
+                3.1882890625,
+                3.2250573125
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                25.3893125,
+                25.36925,
+                25.5964375,
+                25.5063125,
+                25.8004585
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 37.49269275,
+              "samples_ms": [
+                37.471630125,
+                37.400276,
+                37.49269275,
+                37.721286375,
+                37.689052125
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                299.773041,
+                299.202208,
+                299.941542,
+                301.770291,
+                301.512417
+              ]
+            },
+            "cryptography": {
+              "median_ms": 13.179713625,
+              "samples_ms": [
+                13.178375,
+                13.239823,
+                13.241885375,
+                13.179713625,
+                13.083385375
+              ],
+              "batches_per_sample": 1,
+              "raw_samples_ms": [
+                105.427,
+                105.918584,
+                105.935083,
+                105.437709,
+                104.667083
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 3.1882890625,
+          "bend_over_python": 15.486362444590922,
+          "bend_mib_per_second": 20.253164556962023,
+          "bend_parallel_cpu": {
+            "median_ms": 9.25,
+            "samples_ms": [
+              9.25,
+              8.75,
+              9.75,
+              9.375,
+              9.0
+            ],
+            "raw_samples_ms": [
+              74,
+              70,
+              78,
+              75,
+              72
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "bend_ms": 23.5,
+          "bend_samples_ms": [
+            23.25,
+            24.5,
+            25.125,
+            23.375,
+            23.5
+          ],
+          "bend_raw_samples_ms": [
+            186,
+            196,
+            201,
+            187,
+            188
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.5116214140625,
+              "samples_ms": [
+                0.5050791015625,
+                0.5094326171875,
+                0.6846656953125,
+                0.51934765625,
+                0.5116214140625
+              ],
+              "batches_per_sample": 16,
+              "raw_samples_ms": [
+                4.0406328125,
+                4.0754609375,
+                5.4773255625,
+                4.15478125,
+                4.0929713125
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 6.0691796875,
+              "samples_ms": [
+                6.0224895625,
+                6.055971375,
+                6.0764453125,
+                6.0691796875,
+                6.080078125
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                48.1799165,
+                48.447771,
+                48.6115625,
+                48.5534375,
+                48.640625
+              ]
+            },
+            "cryptography": {
+              "median_ms": 1.12149609375,
+              "samples_ms": [
+                1.12149609375,
+                1.12628515625,
+                1.120109375,
+                1.119758453125,
+                1.1286328125
+              ],
+              "batches_per_sample": 8,
+              "raw_samples_ms": [
+                8.97196875,
+                9.01028125,
+                8.960875,
+                8.958067625,
+                9.0290625
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.5116214140625,
+          "bend_over_python": 45.93240109595809,
+          "bend_mib_per_second": 42.5531914893617,
+          "bend_parallel_cpu": {
+            "median_ms": 4.25,
+            "samples_ms": [
+              4.25,
+              4.375,
+              4.375,
+              4.25,
+              4.25
+            ],
+            "raw_samples_ms": [
+              34,
+              35,
+              35,
+              34,
+              34
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "bend_ms": 21.25,
+          "bend_samples_ms": [
+            21.25,
+            21.375,
+            21.375,
+            20.625,
+            21.25
+          ],
+          "bend_raw_samples_ms": [
+            170,
+            171,
+            171,
+            165,
+            170
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.3533497734375,
+              "samples_ms": [
+                0.36236751171875,
+                0.35107258984375,
+                0.35084375,
+                0.3533497734375,
+                0.35420296484375
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.89894009375,
+                2.80858071875,
+                2.80675,
+                2.8267981875,
+                2.83362371875
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 4.0566875,
+              "samples_ms": [
+                4.07254425,
+                4.117229125,
+                4.0566875,
+                4.0518385625,
+                4.053875
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                32.580354,
+                32.937833,
+                32.4535,
+                32.4147085,
+                32.431
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.388762046875,
+              "samples_ms": [
+                0.389792640625,
+                0.395523765625,
+                0.3859977265625,
+                0.3857353515625,
+                0.388762046875
+              ],
+              "batches_per_sample": 16,
+              "raw_samples_ms": [
+                3.118341125,
+                3.164190125,
+                3.0879818125,
+                3.0858828125,
+                3.110096375
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.3533497734375,
+          "bend_over_python": 60.13871126411991,
+          "bend_mib_per_second": 47.05882352941176,
+          "bend_parallel_cpu": {
+            "median_ms": 3.75,
+            "samples_ms": [
+              3.75,
+              3.875,
+              3.875,
+              3.75,
+              3.5
+            ],
+            "raw_samples_ms": [
+              30,
+              31,
+              31,
+              30,
+              28
+            ],
+            "corpus_scale": 8.0
+          }
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "bend_ms": 20.875,
+          "bend_samples_ms": [
+            21.125,
+            21.0,
+            20.875,
+            20.625,
+            20.375
+          ],
+          "bend_raw_samples_ms": [
+            169,
+            168,
+            167,
+            165,
+            163
+          ],
+          "python": {
+            "hashlib": {
+              "median_ms": 0.343780109375,
+              "samples_ms": [
+                0.342398765625,
+                0.343780109375,
+                0.34414371875,
+                0.34221533203125,
+                0.34390218359375
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.739190125,
+                2.750240875,
+                2.75314975,
+                2.73772265625,
+                2.75121746875
+              ]
+            },
+            "pycryptodome": {
+              "median_ms": 3.942947875,
+              "samples_ms": [
+                3.9652135625,
+                3.942947875,
+                3.94904425,
+                3.900752625,
+                3.93091925
+              ],
+              "batches_per_sample": 2,
+              "raw_samples_ms": [
+                31.7217085,
+                31.543583,
+                31.592354,
+                31.206021,
+                31.447354
+              ]
+            },
+            "cryptography": {
+              "median_ms": 0.3529786796875,
+              "samples_ms": [
+                0.352385578125,
+                0.3529786796875,
+                0.35379329296875,
+                0.3524072265625,
+                0.356450359375
+              ],
+              "batches_per_sample": 32,
+              "raw_samples_ms": [
+                2.819084625,
+                2.8238294375,
+                2.83034634375,
+                2.8192578125,
+                2.851602875
+              ]
+            }
+          },
+          "fastest_python": "hashlib",
+          "fastest_python_ms": 0.343780109375,
+          "bend_over_python": 60.721954036116934,
+          "bend_mib_per_second": 47.90419161676646,
+          "bend_parallel_cpu": {
+            "median_ms": 4.125,
+            "samples_ms": [
+              4.25,
+              4.25,
+              4.125,
+              4.125,
+              4.125
+            ],
+            "raw_samples_ms": [
+              34,
+              34,
+              33,
+              33,
+              33
+            ],
+            "corpus_scale": 8.0
+          }
+        }
+      ],
+      "corpus_sha256": "db62a84f070a6900a1e402ac49fef452bd1cb0cc9d8cb802c1762c5779981a1e",
+      "bend_total_ms": 115.0,
+      "python_totals_ms": {
+        "hashlib": 4.397040359375,
+        "pycryptodome": 51.561507812500004,
+        "cryptography": 15.0429504453125
+      },
+      "fastest_python": "hashlib",
+      "fastest_python_total_ms": 4.397040359375,
+      "bend_over_python": 26.153955979686806,
+      "winner": "hashlib",
+      "bend_parallel_cpu_total_ms": 21.375,
+      "bend_mode_totals_ms": {
+        "sequential_cpu": 115.0,
+        "parallel_cpu": 21.375
+      },
+      "best_bend_mode": "parallel_cpu",
+      "best_bend_total_ms": 21.375,
+      "best_bend_over_python": 4.861224426659178
+    }
+  ]
+}

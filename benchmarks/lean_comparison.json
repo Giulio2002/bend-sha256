@@ -1,0 +1,440 @@
+{
+  "lean_commit": "4310886800df03d5850ae5aed170c5611548f921",
+  "lean_version": "4.29.1",
+  "bend_version": "2.0.5",
+  "bend_commit": "b3ce430",
+  "corpus_bytes_per_workload": 8388608,
+  "corpus_sha256": "db62a84f070a6900a1e402ac49fef452bd1cb0cc9d8cb802c1762c5779981a1e",
+  "platform": "macOS-15.6-arm64-arm-64bit",
+  "method": "3 suites; 1 warmup and 3 measured fresh-process batches per workload per suite; all outputs verified; input preparation/build/startup/output excluded; digest allocation retained. Backend order rotates across suites. Research worker remains running, so concurrent load is a limitation. Lean native single-threaded, Bend sequential and parallel CPU.",
+  "results": [
+    {
+      "repeat": 0,
+      "backend": "lean_native",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            637.504458,
+            681.289875,
+            633.628709
+          ],
+          "median_ms": 637.504458
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            294.660459,
+            375.953834,
+            382.311625
+          ],
+          "median_ms": 375.953834
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            320.878375,
+            310.953917,
+            280.82325
+          ],
+          "median_ms": 310.953917
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            286.689208,
+            326.236667,
+            277.081958
+          ],
+          "median_ms": 286.689208
+        }
+      ],
+      "total_ms": 1611.1014169999999
+    },
+    {
+      "repeat": 0,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            435.0,
+            471.0,
+            437.0
+          ],
+          "median_ms": 437.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            208.0,
+            212.0,
+            207.0
+          ],
+          "median_ms": 208.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            188.0,
+            190.0,
+            186.0
+          ],
+          "median_ms": 188.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            185.0,
+            185.0,
+            185.0
+          ],
+          "median_ms": 185.0
+        }
+      ],
+      "total_ms": 1018.0
+    },
+    {
+      "repeat": 0,
+      "backend": "bend_parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            97.0,
+            90.0,
+            88.0
+          ],
+          "median_ms": 90.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            42.0,
+            42.0,
+            39.0
+          ],
+          "median_ms": 42.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            34.0,
+            36.0,
+            39.0
+          ],
+          "median_ms": 36.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            40.0,
+            43.0,
+            39.0
+          ],
+          "median_ms": 40.0
+        }
+      ],
+      "total_ms": 208.0
+    },
+    {
+      "repeat": 1,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            434.0,
+            437.0,
+            435.0
+          ],
+          "median_ms": 435.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            209.0,
+            207.0,
+            207.0
+          ],
+          "median_ms": 207.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            188.0,
+            186.0,
+            186.0
+          ],
+          "median_ms": 186.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            189.0,
+            184.0,
+            185.0
+          ],
+          "median_ms": 185.0
+        }
+      ],
+      "total_ms": 1013.0
+    },
+    {
+      "repeat": 1,
+      "backend": "bend_parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            89.0,
+            97.0,
+            91.0
+          ],
+          "median_ms": 91.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            41.0,
+            39.0,
+            37.0
+          ],
+          "median_ms": 39.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            34.0,
+            39.0,
+            36.0
+          ],
+          "median_ms": 36.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            38.0,
+            38.0,
+            39.0
+          ],
+          "median_ms": 38.0
+        }
+      ],
+      "total_ms": 204.0
+    },
+    {
+      "repeat": 1,
+      "backend": "lean_native",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            706.53425,
+            663.518,
+            735.042416
+          ],
+          "median_ms": 706.53425
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            398.748459,
+            367.907166,
+            304.058333
+          ],
+          "median_ms": 367.907166
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            357.536041,
+            356.064041,
+            313.558875
+          ],
+          "median_ms": 356.064041
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            334.518583,
+            352.451458,
+            348.350166
+          ],
+          "median_ms": 348.350166
+        }
+      ],
+      "total_ms": 1778.855623
+    },
+    {
+      "repeat": 2,
+      "backend": "bend_parallel",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            99.0,
+            97.0,
+            90.0
+          ],
+          "median_ms": 97.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            43.0,
+            44.0,
+            46.0
+          ],
+          "median_ms": 44.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            42.0,
+            35.0,
+            38.0
+          ],
+          "median_ms": 38.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            41.0,
+            43.0,
+            42.0
+          ],
+          "median_ms": 42.0
+        }
+      ],
+      "total_ms": 221.0
+    },
+    {
+      "repeat": 2,
+      "backend": "lean_native",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            711.276667,
+            658.723958,
+            664.289667
+          ],
+          "median_ms": 664.289667
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            315.523208,
+            382.267,
+            354.858292
+          ],
+          "median_ms": 354.858292
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            324.719542,
+            363.186416,
+            307.787708
+          ],
+          "median_ms": 324.719542
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            278.147708,
+            320.750333,
+            342.544417
+          ],
+          "median_ms": 320.750333
+        }
+      ],
+      "total_ms": 1664.6178340000001
+    },
+    {
+      "repeat": 2,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            435.0,
+            435.0,
+            440.0
+          ],
+          "median_ms": 435.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            209.0,
+            207.0,
+            211.0
+          ],
+          "median_ms": 209.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            190.0,
+            193.0,
+            188.0
+          ],
+          "median_ms": 190.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            187.0,
+            188.0,
+            184.0
+          ],
+          "median_ms": 187.0
+        }
+      ],
+      "total_ms": 1021.0
+    }
+  ],
+  "median_suite_ms": {
+    "lean_native": 1664.6178340000001,
+    "bend_sequential": 1018.0,
+    "bend_parallel": 208.0
+  }
+}

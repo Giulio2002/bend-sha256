@@ -386,3 +386,46 @@ These results concern the optimized implementation. Separately executing the
 recursive reference specification hit a JS memory/stack fault on a million-byte
 probe, while its native probe passed. See [the specification audit](CORRECTNESS.md#specification-audit-and-domain-qualification)
 for this resource limitation and remaining specification-hardening opportunities.
+
+## Latest completed research run
+
+Run `20260918T194829Z-b4cc8b` ended for publication with `plateau` after 6 iterations.
+The best retained CPU score was **21.375 ms per normalized suite**,
+compared with 23.125 ms at this run's baseline (7.57% lower).
+Each workload time is normalized to 1 MiB; raw batch sizes and timings are retained
+in [the final report](benchmarks/research_final.json). These normalized scores
+should not be compared directly with older uncalibrated totals.
+
+The winning implementation and supporting proofs are now in this checkout.
+The winner's complete research validation was rerun successfully before publication:
+universal and vector proofs, 182 differential cases per API on JS/native, and
+three negative public-mutation proof checks. Only the retained winner is exported;
+failed, rejected and unreviewed candidates remain archived in the local run.
+
+## Lean versus Bend SHA-256 benchmark
+
+Measured on the same Apple M4 with identical deterministic inputs: 8 MiB per
+workload at 64-, 1,024-, 16,384- and 65,536-byte message sizes, or 32 MiB per suite.
+Three suites per backend, each with one warmup and three measured samples per
+workload; backend order rotated. Every digest matched hashlib. Compilation,
+process startup, input preparation and output were excluded; hashing and digest
+allocation/retention were timed.
+
+| Implementation | Median suite time | Relative to Lean |
+|---|---:|---:|
+| Lean native, sequential | 1,664.618 ms | 1.00x |
+| Bend sequential CPU | 1,018.000 ms | 1.64x |
+| Bend parallel CPU | 208.000 ms | 8.00x |
+
+The Lean implementation is [etheorem/LeanSha256](https://github.com/etheorem/LeanSha256),
+commit `4310886800df03d5850ae5aed170c5611548f921`, compiled with Lean 4.29.1
+and the repository's native optimization settings. The measured Bend version
+is the rolling-window implementation at `b3ce430`, using Bend 2.0.5. This is a
+versioned comparison recorded before the final research winner above; the table
+does not claim to measure subsequent optimizations.
+
+Parallel Bend used multiple CPU cores; the tested Lean driver was single-threaded.
+Both used their public APIs, with ByteArray inputs in Lean and word lists in Bend.
+The research worker remained running, so concurrent load is a limitation.
+All batches exceeded 20 ms. These are raw 32 MiB suite totals, not the normalized
+research scores above. [Complete measurements and metadata](benchmarks/lean_comparison.json).
