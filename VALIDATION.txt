@@ -1,0 +1,16 @@
+Bend 2.0.5 - final verification
+
+Command: python3 -u test_sha256.py --native
+Specification independence: only Base and the neutral state datatype imported
+Universal correctness theorem: All terms check.
+Bend proofs: All terms check.
+Universal proof mutation checks: 12 algorithm defects rejected without test vectors
+JS: 182 SHA-256 cases passed
+Native: 182 SHA-256 cases passed
+
+Universal theorem gate (no concrete test vectors): bend CORRECTNESS.bend
+Public statement: LAWS.sha256_correct
+  for every bytes: List<&2, U32>
+  SHA.sha256(bytes) == FIPS.sha256(bytes)
+
+Scope and trust assumptions: CORRECTNESS.md
