@@ -47,9 +47,39 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'Frozen trust-boundary'):
             validation.audit(self.root)
 
-    def test_supporting_law_cannot_be_weakened(self):
-        self.edit('conformance.bend', 'for +xs:', 'for xs:')
-        with self.assertRaisesRegex(RuntimeError, 'Law declarations'):
+    def test_supporting_law_can_be_renamed_with_complete_proof(self):
+        p = self.root / 'conformance.bend'
+        p.write_text(p.read_text().replace('count_acc', 'optimized_count_acc'))
+        validation.audit(self.root)
+        result = validation.checked(['bend', 'CORRECTNESS.bend'], cwd=self.root)
+        self.assertIn('All terms check.', result)
+
+    def test_new_proved_law_is_accepted(self):
+        p = self.root / 'conformance.bend'
+        p.write_text(p.read_text() + '\nlaw helper_identity:\n  for +x: U32\n  {x == x : U32}\n\ndef helper_identity(x):\n  {==}\n')
+        validation.audit(self.root)
+        self.assertIn('All terms check.', validation.checked(['bend', 'CORRECTNESS.bend'], cwd=self.root))
+
+    def test_unproved_supporting_law_is_rejected(self):
+        p = self.root / 'conformance.bend'
+        p.write_text(p.read_text() + '\nlaw unproved:\n  {0 == 1 : U32}\n')
+        with self.assertRaisesRegex(RuntimeError, 'Supporting law'):
+            validation.audit(self.root)
+
+    def test_false_proof_is_rejected_by_checker(self):
+        p = self.root / 'conformance.bend'
+        p.write_text(p.read_text() + '\nlaw false_claim:\n  {0 == 1 : U32}\n\ndef false_claim():\n  {==}\n')
+        validation.audit(self.root)
+        validation.checked(['bend', 'CORRECTNESS.bend'], cwd=self.root, expect_failure=True)
+
+    def test_public_claim_is_still_frozen(self):
+        self.edit('LAWS.bend', 'for +bytes:', 'for bytes:')
+        with self.assertRaisesRegex(RuntimeError, 'Frozen trust-boundary'):
+            validation.audit(self.root)
+
+    def test_public_proof_cannot_be_removed(self):
+        self.edit('CORRECTNESS.bend', 'def Laws.sha256_correct(', 'def removed(')
+        with self.assertRaisesRegex(RuntimeError, 'Every frozen public claim'):
             validation.audit(self.root)
 
     def test_foreign_import_rejected(self):

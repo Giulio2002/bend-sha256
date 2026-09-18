@@ -284,7 +284,7 @@ Every candidate must pass `uv run --frozen python research_validate.py` before
 it is measured. This gate checks:
 
 - frozen FIPS specification, state type, public theorem and proof entry points;
-- unchanged supporting law statements and imports, with no unsafe code, holes,
+- checked supporting proofs (whose statements may evolve), frozen imports, and no unsafe code, holes,
   foreign imports, effects or overrides of trusted definitions;
 - the universal theorem and all four concrete digest proofs;
 - all 182 differential cases for each API on both JS and native CPU backends;
@@ -297,13 +297,17 @@ public-wrapper mutations instead: zero digest, prepended byte, and reversed
 digest. Each mutant must first execute successfully, then fail the universal
 proof. The original mutation suite remains enabled by default.
 
-The agent can edit `core.bend`, `sha256.bend`, and supporting proof bodies in
-`conformance.bend`, `list_proofs.bend`, and `padding_proof.bend`. The existing
-supporting statements and import graph are deliberately frozen. This limits
-which refactors can be attempted, but prevents changing the correctness target
-alongside the implementation. A broader proof architecture requires a separately
-reviewed change to the research contract. The hash manifest is a reviewed,
-protected baseline, not something the agent is allowed to regenerate.
+The agent can edit `core.bend`, `sha256.bend`, `conformance.bend`,
+`list_proofs.bend`, `padding_proof.bend`, and `CORRECTNESS.bend`. Supporting
+lemmas may be added, renamed, replaced or restated, and proof bodies may change.
+Every law must have a checked proof, and all five unchanged public claims must
+still hold unconditionally. The independent specification, state type,
+`LAWS.bend`, concrete vector proofs, import graph and measurement harness remain
+frozen. The orchestrator reviews the revised dependency chain and must explain
+why full arbitrary-input verification still reaches the measured implementation.
+Proof rewrites require a concrete performance mechanism and repeatable gain
+above 3 percent, beyond timing noise; proof churn alone is not an improvement.
+The hash manifest is a reviewed, protected baseline that the agent may not edit.
 
 The metric is the fastest complete-suite Bend time (`best_bend_total_ms`) across
 sequential CPU, parallel CPU and GPU, not a ratio that could improve by slowing

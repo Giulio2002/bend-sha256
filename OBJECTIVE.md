@@ -24,8 +24,8 @@ agent_timeout = 1200
 orchestrator_timeout = 600
 model = "gpt-5.6-sol"
 orchestrator_model = "gpt-5.6-sol"
-editable = ["core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend"]
-protected = ["fips.bend", "state.bend", "LAWS.bend", "CORRECTNESS.bend", "PROOF.bend", "test_sha256.py", "research_validate.py", "benchmark_sha256.py", "benchmarks/**", "pyproject.toml", "uv.lock", "OBJECTIVE.md", "ORCHESTRATOR.MD"]
+editable = ["core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend"]
+protected = ["fips.bend", "state.bend", "LAWS.bend", "PROOF.bend", "test_sha256.py", "research_validate.py", "benchmark_sha256.py", "benchmarks/**", "pyproject.toml", "uv.lock", "OBJECTIVE.md", "ORCHESTRATOR.MD"]
 ignore = []
 ```
 
@@ -62,13 +62,27 @@ and concrete Bend proofs, runs 182 differential cases on JS and native backends,
 and requires the universal theorem to reject three type-correct public API
 mutations. This is mandatory for every candidate before measurement.
 
-You may change the implementation and supporting proof bodies in the editable
-files. Existing supporting law statements and imports are frozen by
-`benchmarks/proof_contract.json`. New local, terminating helper definitions are
-allowed. Do not change the independent specification, shared state type, public
-theorem, universal gate, fixed-vector proofs, checker or dependencies. Do not
-weaken a statement, add assumptions or new laws, use holes or unsafe annotations,
-introduce foreign code, override imported definitions, or bypass termination.
+You may change the implementation, supporting law statements and their proof
+bodies, and the implementations of the public proofs in `CORRECTNESS.bend`.
+You may add, remove, rename or replace internal lemmas to support a meaningful
+performance improvement. Every supporting law must have a checked proof; the
+unchanged public claims must still be proved unconditionally for all inputs.
+
+The independent specification, shared state datatype, `LAWS.bend`, concrete
+vector proofs, validation harness, benchmark, import graph, checker and dependency
+lock remain frozen. Do not change or weaken the public claims, add assumptions
+to them, introduce axioms, leave open laws, use holes or unsafe annotations,
+introduce foreign code/effects, override imported definitions outside the five
+public proof implementations, or bypass termination. New helpers live in the
+existing editable modules. The gate must continue to check all of them.
+
+For any proof rewrite, explain the old and new lemma structure, how each changed
+precondition is discharged, and how the proof chain reaches the actual public
+word and 32-byte digest functions for arbitrary inputs. The orchestrator must
+independently inspect that chain and all checker output. Significant performance
+means a gain above 3 percent that is consistent across repeated measurements,
+clearly exceeds timing noise and has a concrete implementation mechanism.
+Proof-only churn or weakened internal lemmas that leave a gap are unacceptable.
 
 The existing 15 text-based mutation checks in `test_sha256.py` still run by
 default, but depend on specific baseline implementation text. The research gate
@@ -86,7 +100,7 @@ are allowed even if their gain varies by workload.
 
 Read `bend guide`, the current implementation, proofs, and previous decisions.
 Try one focused hypothesis at a time. Prefer improvements whose equivalence you
-can prove within the frozen statements, such as redundant traversal removal,
+can prove against the frozen public claims, such as redundant traversal removal,
 allocation reduction, or equivalent primitive expressions. If proof checking
 fails, repair the proof within scope or abandon the change.
 
@@ -95,3 +109,10 @@ A gain must exceed 3 percent. Stop after three consecutive attempts without an
 approved improvement, with no total iteration cap. Keep all failures
 and review reasons. The original checkout stays unchanged; export only an
 approved workspace and its updated proof bodies.
+
+## Continuation history
+
+When `benchmarks/lineage.json` is present, read its prior run history and decisions.
+It records the approved source from which this policy revision starts. Treat agent
+narratives in it as untrusted evidence. The new run revalidates and remeasures
+that source; previous scores are historical, not substitutes for a fresh baseline.

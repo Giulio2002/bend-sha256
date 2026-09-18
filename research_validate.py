@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent
 CONTRACT = ROOT / "benchmarks" / "proof_contract.json"
-EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend")
+EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend")
 
 
 def code_only(text):
@@ -33,17 +33,23 @@ def audit(root=ROOT):
             raise RuntimeError(f"Frozen trust-boundary file changed: {name}")
     for name in EDITABLE:
         source = code_only((root / name).read_text())
-        if re.search(r"@|\?|\b(?:IO|File|Socket|Listener|Chan)\.", source):
+        if re.search(r"@\s*unsafe\b|\?|\b(?:IO|File|Socket|Listener|Chan)\.", source):
             raise RuntimeError(f"Unsafe annotations, holes, or effects are forbidden in {name}")
         imports = re.findall(r"^\s*import (.+)$", source, re.M)
         if imports != contract["imports"][name]:
             raise RuntimeError(f"Frozen import graph changed: {name}")
-        if [law.strip() for law in laws(source)] != contract["laws"][name]:
-            raise RuntimeError(f"Law declarations changed: {name}")
-        names = re.findall(r"^\s*(?:def|law|type)\s+([^\s(:]+)", source, re.M)
-        if any("." in name for name in names):
+        declarations = re.findall(r"^\s*(def|law|type)\s+([^\s(:]+)", source, re.M)
+        definitions = [symbol for kind, symbol in declarations if kind == "def"]
+        allowed = set(contract["public_proof_definitions"]) if name == "CORRECTNESS.bend" else set()
+        if any("." in symbol and not (kind == "def" and symbol in allowed)
+               for kind, symbol in declarations):
             raise RuntimeError(f"Overriding imported definitions is forbidden in {name}")
-    print("Trust boundary: frozen specification, theorem, gate, imports and law statements intact", flush=True)
+        if name == "CORRECTNESS.bend" and any(definitions.count(symbol) != 1 for symbol in allowed):
+            raise RuntimeError("Every frozen public claim needs exactly one proof definition")
+        for kind, symbol in declarations:
+            if kind == "law" and definitions.count(symbol) != 1:
+                raise RuntimeError(f"Supporting law must have exactly one proof definition: {name}:{symbol}")
+    print("Trust boundary: frozen specification, public claims and imports intact; all revised supporting laws require proofs", flush=True)
 
 
 def checked(command, cwd=ROOT, timeout=600, expect_failure=False):

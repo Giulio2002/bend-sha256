@@ -148,9 +148,11 @@ the universal gate must reject each at `digest_bytes_correct`.
 ## Optimization gate
 
 `research_validate.py` freezes the original specification, state type, public
-claim and proof entry points through `benchmarks/proof_contract.json`. Supporting
-proof bodies may change during research, while their law declarations and imports
-remain fixed. The gate also checks both execution backends and three structural
+claims through `benchmarks/proof_contract.json`. Supporting law statements and
+proof bodies may change during research, including the public proof implementations
+in `CORRECTNESS.bend`. The import graph stays fixed. Every supporting law must
+have a checked proof, and all unchanged public declarations in `LAWS.bend` must
+still be proved unconditionally. The orchestrator audits the revised proof chain. The gate also checks both execution backends and three structural
 public API mutations. It runs before every candidate benchmark.
 
 GPU benchmarking invokes the same public implementation at each message-tree
