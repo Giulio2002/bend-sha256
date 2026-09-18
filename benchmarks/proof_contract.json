@@ -7,7 +7,7 @@
     "CORRECTNESS.bend": "53514f078f2eb3a81cce74f831316ee043a70886562080b99e02671a0a85036b",
     "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
     "test_sha256.py": "42a776a9fbb91d59f06ba9a633ff26306bfc7e5677935a36d9b248a5c764db5d",
-    "research_validate.py": "6a6f3234e24a93b23738a6972748dd46d62e904e6b7d0bec293315ddb577fcb8",
+    "research_validate.py": "e1d5d0d240c57c49076b87d2ffb248be7df50561a1df39d7b5b417975c35b9ef",
     "benchmark_sha256.py": "8d01eaffbfb7c2081966b6045fac688e8127617d14b11fde9ddfb95755b3e9b0",
     "benchmarks/driver.bend": "7f3a23118f3719786373de925adeb62c8e4aaea8958af86b51e5737c77c1c3bd",
     "pyproject.toml": "527cafbfc3af4b1ef0c33939a95eb0bc4f985ce2f7ecf5cfd61fb8f61408f334",

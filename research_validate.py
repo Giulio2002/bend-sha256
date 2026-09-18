@@ -74,7 +74,14 @@ def public_mutations():
             original, count = re.subn(r"^def sha256\(", "def sha256_original(", target.read_text(), count=1, flags=re.M)
             if count != 1:
                 raise RuntimeError("Cannot locate public sha256 definition for negative proof check")
-            target.write_text(original + "\n\ndef sha256(bytes: List<&2, U32>) -> List<&2, U32>:\n  " + expression + "\n")
+            # Bend resolves definitions in order. Insert the mutant immediately
+            # after the renamed original, before dependent APIs such as sha256_bytes.
+            definition = re.search(r"^def sha256_original\([\s\S]*?(?=^(?:def|law|type|import)\b|\Z)", original, re.M)
+            if definition is None:
+                raise RuntimeError("Cannot locate renamed sha256 definition")
+            offset = definition.end()
+            wrapper = "\ndef sha256(bytes: List<&2, U32>) -> List<&2, U32>:\n  " + expression + "\n\n"
+            target.write_text(original[:offset] + wrapper + original[offset:])
             # Ensure the mutant is executable/type-correct. Rejection must come
             # from the universal theorem, not a typo in our injected source.
             (root / "mutation_probe.bend").write_text(
