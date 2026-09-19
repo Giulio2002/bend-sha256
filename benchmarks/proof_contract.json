@@ -7,7 +7,7 @@
     "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
     "test_sha256.py": "84bd7d3c92e8e7ad683e053fa26f7999c0cc8385fdb20821136a75d7f890898d",
     "research_validate.py": "6d766c1736ca1882139947b51740f2788cd477716a2373c7451aec1a81927af6",
-    "benchmark_sha256.py": "50db45ad61e6b4bb90b020b051d90e41d195bfdd74a2cb7955f8568d528cafab",
+    "benchmark_sha256.py": "20999c41812f3aa6515b5a38bb6fa858f16075da4b6f41b5163fdecb5173b085",
     "benchmarks/driver.bend": "d6c73df3c6ad6a18af2e4f754eb383ca397e1d13cad833f516b543e4e8672709",
     "pyproject.toml": "527cafbfc3af4b1ef0c33939a95eb0bc4f985ce2f7ecf5cfd61fb8f61408f334",
     "uv.lock": "ae211662260fb93a1bd6cacd7bf538abd4692a64092f5c75d3957b662ce51a90",

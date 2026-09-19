@@ -128,6 +128,24 @@ class ContractTests(unittest.TestCase):
         for call in timing.call_args_list[1::2]:
             self.assertEqual(call.args[-2:], ('--gpu', 'off'))
 
+    def test_sequential_only_never_builds_or_measures_parallel(self):
+        with patch.object(benchmark, 'run', return_value='bend 2.0.5') as run, \
+             patch.object(benchmark, 'gpu_hardware', side_effect=AssertionError('No GPU detection')), \
+             patch.object(benchmark, 'native_samples', return_value={'median_ms': 100, 'samples_ms': [100] * 5}) as timing, \
+             patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
+             contextlib.redirect_stderr(io.StringIO()):
+            result = benchmark.benchmark(sequential_only=True)
+        self.assertEqual(result['scored_modes'], ['sequential_cpu'])
+        self.assertEqual(result['metric'], 'bend_total_ms')
+        self.assertEqual(result['bend_mode_totals_ms'], {'sequential_cpu': 400})
+        self.assertEqual(timing.call_count, 4)
+        self.assertFalse(any('benchmarks/gpu_driver.bend' in c.args[0] for c in run.call_args_list))
+        self.assertNotIn('bend_parallel_cpu_total_ms', result)
+
+    def test_sequential_only_rejects_gpu_request(self):
+        with self.assertRaises(ValueError):
+            benchmark.benchmark('required', sequential_only=True)
+
     def test_short_batches_trigger_calibration_not_candidate_failure(self):
         with patch.object(benchmark, 'benchmark_once', side_effect=[benchmark.BatchTooShort('short'), {'best_bend_total_ms': 5}]) as once, contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(benchmark.benchmark()['best_bend_total_ms'], 5)

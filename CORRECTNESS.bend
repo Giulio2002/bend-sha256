@@ -10,7 +10,7 @@ def Laws.constants_correct():
   {==}
 
 def Laws.sha256_correct(bytes):
-  Conformance.hash_correct(bytes, 48n, SHA.constants())
+  Conformance.sha256_correct(bytes)
 
 law digest_octets_length:
   for s: State.State

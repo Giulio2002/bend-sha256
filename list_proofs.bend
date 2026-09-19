@@ -78,3 +78,20 @@ law append_assoc_reverse:
 def append_assoc_reverse(A, xs, ys, zs):
   Equal.sym(List<&2, A>, List.append(&2, A, List.append(&2, A, xs, ys), zs),
     List.append(&2, A, xs, List.append(&2, A, ys, zs)), append_assoc(A, xs, ys, zs))
+
+law add_swap:
+  for +n: Nat
+  for +k: Nat
+  for +m: Nat
+  {Nat.add(n, Nat.add(k, m)) == Nat.add(k, Nat.add(n, m)) : Nat}
+
+def add_swap(n, k, m):
+  match k:
+    case 0n:
+      {==}
+    case 1n+p:
+      Equal.trans(Nat, Nat.add(n, 1n+Nat.add(p, m)),
+        1n+Nat.add(n, Nat.add(p, m)), 1n+Nat.add(p, Nat.add(n, m)),
+        add_succ(n, Nat.add(p, m)),
+        Equal.cong(Nat, Nat, x => 1n+x, Nat.add(n, Nat.add(p, m)),
+          Nat.add(p, Nat.add(n, m)), add_swap(n, p, m)))

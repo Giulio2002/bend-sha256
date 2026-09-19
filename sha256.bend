@@ -23,7 +23,7 @@ def constants() -> List<&2, U32>:
    2428436474, 2756734187, 3204031479, 3329325298]
 
 def sha256(bytes: List<&2, U32>) -> List<&2, U32>:
-  Core.hash(bytes, 48n, constants())
+  Core.sha256(bytes)
 
 def ascii(s: String) -> List<&2, U32>:
   Core.ascii(s)

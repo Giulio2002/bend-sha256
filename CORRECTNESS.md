@@ -54,54 +54,39 @@ All named equalities in the following table are actual checked Bend laws.
 
 | Lemma | What it establishes |
 |---|---|
-| `count_acc`, `count_correct` | Tail-recursive byte count agrees with list length |
-| `octets_correct`, `length_correct` | Accumulated length bytes agree with recursive big-endian encoding |
-| `Padding.zeros_correct` | Modular zero count equals the separate two-case padding rule for every Nat |
-| `pad_correct` | Complete implementation padding equals specification padding |
-| `words_acc`, `words_correct` | Accumulated word parsing agrees with direct specification parsing |
-| `nth_correct`, `next_correct` | History lookup and the schedule recurrence agree |
-| `extension_correct`, `schedule_correct` | All generated schedule words agree, by induction on the extension count |
-| `schedules_acc`, `schedules_correct` | Block parsing and schedule order agree |
-| `prepare_correct` | The entire concrete preprocessing pipeline agrees |
-| `step_correct`, `rounds_correct` | One round and every finite round sequence agree |
-| `feedforward_correct`, `compression_correct` | Componentwise feed-forward and compression agree |
-| `expanded_rounds_correct`, `schedule_rounds_correct` | Fused schedule generation agrees with materialized schedule rounds |
-| `fused_compress_correct`, `fused_compress_slow_correct` | Window and fallback compression agree with specification compression |
-| `window_rounds_correct`, `window_schedule_rounds_correct` | Fixed-window recurrence and rounds agree with reverse-history lists |
-| `window_compress16_correct` | Direct execution of the first 16 rounds agrees with fused compression |
-| `block_words_correct`, `block_bytes_correct` | Incremental parsing and compression agree with specification block processing |
-| `blocks_correct` | Accumulated block processing equals composition in message order |
-| `digest_correct`, `hash_correct` | Extraction and the full concrete pipeline agree |
-| `Laws.constants_correct`, `Laws.sha256_correct` | Fixed table equality and the actual exported SHA-256 equality |
+| `octets_correct`, `length_correct` | Length encoding agrees with the independent specification |
+| `Padding.zeros_correct`, `suffix_correct` | The full padding suffix agrees for every message length |
+| `nth_correct`, `next_correct`, `extension_correct`, `schedule_correct` | Generic schedule generation agrees with the FIPS recurrence |
+| `step_correct`, `rounds_correct`, `feedforward_correct`, `compression_correct` | Arithmetic and generic compression agree |
+| `expanded_rounds_correct`, `schedule_rounds_correct` | Fused generation agrees with materialized schedule rounds |
+| `fused_compress_correct`, `fused_compress_slow_correct` | Optimized and fallback compression refine the generic algorithm |
+| `window_rounds_correct`, `window_schedule_rounds_correct`, `window_compress16_correct` | Fixed-window operations refine list-based compression |
+| `kr64_correct` through `kr16_correct`, `fips16_correct` | Literal-constant round sequence agrees with the fixed FIPS table |
+| `mod_quotient`, `mod_shift`, `mod_tail` | Counting full blocks preserves the remainder needed for final padding |
+| `stream_correct` | Processing input blocks directly agrees with generic processing of the padded message |
+| `block_bytes_correct`, `digest_correct`, `sha256_correct` | Streaming output reaches the independent complete hash pipeline |
+| All five `Laws.*` public proofs | Constants, word digest, serialization, byte digest and byte length remain correct |
 
-The accumulator invariants avoid assumptions about input length:
-
-    words_go(bytes, acc) = reverse_append(acc, FIPS.words(bytes))
-
-    schedules_go(words, extra, acc)
-      = reverse_append(acc, FIPS.schedules(words, extra))
-
-These helper proofs recurse on the remaining input. Pattern cases explicitly cover every
-short suffix, so no input case is omitted. A generic double-reversal lemma
-connects implementation padding's reverse-append to direct list concatenation.
+The key streaming invariant quantifies over arbitrary remaining bytes, block
+count k, expansion count and state. It relates `stream(bytes, 64*k, ...)` to
+generic `block_bytes` applied to those bytes plus the padding suffix for their
+length plus 64*k. The full-block case recurses at k+1. All 64 short-tail cases
+prove the exact placement of the marker, zero padding and length words, including
+the two-block boundary at 56 bytes. The public function starts at k=0.
 
 `padding_proof.bend` handles every Nat: the finite prefix 0-119 is followed by a
 symbolic `120+p` branch. In that last branch both saturated subtractions reduce
 to zero for arbitrary p. This is a universal case split, not a list of test
 vectors or an empirical bound on message lengths.
 
-The proof of the optimized public path uses `hash_correct`, which invokes
-`block_bytes_correct`; its dependency chain includes `window_compress16_correct`
-and the fixed-window compression lemmas. The
-materialized-list helpers remain useful in the equivalence argument but are
-not the public hashing execution path.
-
-`hash_correct` is generalized over the extension count and constant table. That
-keeps proof checking from expanding large symbolic computations. It does **not**
-accept an arbitrary preprocessing function: each side uses its own complete,
-explicit preprocessing implementation. `Laws.sha256_correct` instantiates the
-proved result at exactly 48 extra words and the public constant table. The two
-fixed tables also agree by checked computation.
+The public proof invokes `Conformance.sha256_correct`, which composes
+`suffix_correct`, `digest_correct`, `stream_correct` and `block_bytes_correct`.
+The streaming lemma uses `fips16_correct` and the literal-round lemmas to connect
+the actual optimized execution to the prior generic compression proof. The
+public entry point selects exactly 48 derived rounds and the standard initial
+state; fixed-table agreement is checked by conversion. The theorem is
+unconditional over every public input list, with no caller-supplied correctness
+premise. The public serialization and length proofs remain unchanged.
 
 ## Validation independent of the proof construction
 

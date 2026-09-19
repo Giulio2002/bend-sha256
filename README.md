@@ -5,6 +5,57 @@ against a separate executable specification of byte-oriented SHA-256 from
 FIPS 180-4. The universal proof covers preprocessing and the complete digest
 computation. No external cryptographic library computes the Bend hash.
 
+## Current sequential implementation and verification
+
+The 2026-09-19 implementation streams complete blocks from the input list,
+unrolls the fixed SHA-256 rounds, and packs final padding and length words
+directly. The public input remains a list; this is not an incremental I/O API.
+The approved sequential score fell from 117 to 26.5 ms per normalized suite,
+a 77.35% reduction (4.42x speedup) in that optimization run.
+
+Fresh publication checks passed all five unchanged public claims, the concrete
+proofs, 182 cases per API on JS and native, and three negative public mutations.
+An additional 132 random messages per backend covered both APIs, every tail
+length after larger blocks, messages up to 4 MiB and high-bit U32 inputs;
+19 large length-field cases passed per backend. Four targeted mutations to
+length encoding, a round constant, and the 55/56-byte padding boundary were
+rejected by the appropriate proof. All 22 harness regression tests passed.
+[Verification evidence and limits](benchmarks/sequential_verification.json).
+
+No introduced correctness defect or benchmark shortcut was found. This is a
+proof of equivalence to the frozen executable specification, not a proof of
+the compiler or hardware. Generated code is larger and compilation can take
+substantially longer. The final small incremental gain remains noise-sensitive.
+
+### Comparison with optimized Lean-generated C
+
+Both implementations ran sequentially on the same host and identical runtime
+inputs. Lean SHA-256 was compiled through Lean 4.29.1's C backend with verified
+`-O3 -march=native` flags, at commit
+`4310886800df03d5850ae5aed170c5611548f921`. Its hash implementation was unchanged.
+This compares against the native build of etheorem/LeanSha256, not an unrelated
+hand-written C SHA-256 implementation.
+
+| Implementation | Median raw suite time | Relative throughput |
+|---|---:|---:|
+| Lean SHA-256, optimized C backend | 3,641.513 ms | 1.00x |
+| Bend SHA-256, sequential native | 357.000 ms | 10.20x |
+
+Three suites per backend, with one warmup and five measured samples per
+workload; backend order alternated between workloads and suites. Each workload
+hashed the same 8 MiB corpus, split into 64-, 1,024-, 16,384- or 65,536-byte
+messages, for 32 MiB per suite. Every digest matched hashlib, and every raw
+batch exceeded 20 ms. These raw totals differ from normalized optimization
+scores. Build, startup, input preparation and output were excluded; hashing
+and digest allocation/retention were included. Other host workloads may affect
+absolute times. [All samples, source hashes and method](benchmarks/lean_sequential_comparison.json).
+
+For sequential-only measurements without any parallel/GPU compilation, run:
+
+```sh
+uv run --frozen python benchmark_sha256.py --gpu off --sequential-only
+```
+
 ## Quick start
 
 Requirements:
@@ -74,8 +125,9 @@ final eight words in order.
 
 Long input traversals use tail recursion to avoid stack growth. This change was
 validated with the standard million-`a` message. Compression directly executes
-the first 16 rounds from packed words, then generates remaining schedule words
-in a fixed window. The specification uses a reverse-history list, expressing
+all 64 rounds with literal FIPS constants and a fixed schedule window.
+It consumes complete blocks directly, counts bytes during that traversal, and
+constructs only the final padded block or blocks as packed words. The specification uses a reverse-history list, expressing
 the recurrence at lags 2, 7, 15, and 16.
 
 The proof proceeds through byte counting, length encoding, padding, parsing,
@@ -84,10 +136,10 @@ lemmas connect accumulator-based traversals to direct recursive definitions.
 The padding proof covers every Nat, including a symbolic tail after the finite
 prefix 0 through 119.
 
-The internal pipeline theorem is generalized over the extension count and
-constant table to keep symbolic proof checking manageable. The public theorem
-instantiates it with 48 extension words and the fixed SHA-256 table. It has no
-arbitrary preprocessing parameter.
+Generic compression lemmas remain generalized over the extension count and
+constant table. The streaming theorem specializes the compressor to the fixed
+SHA-256 table and connects it to the independent specification. The public
+theorem selects 48 extension words and has no arbitrary preprocessing parameter.
 
 The initial version had only a core refinement proof with shared preprocessing.
 That gap is closed here: the specification now contains its own algorithm
@@ -372,7 +424,7 @@ proofs and mutation rejection. These diagnostics ran alongside the research
 worker and are not an orchestrator approval. See
 [measurements and method](benchmarks/rolling_window_evidence.json).
 
-## Current implementation verification
+## Previous implementation verification (d329dab)
 
 The implementation published at `d329dab` passed fresh validation on 2026-09-18:
 
@@ -387,7 +439,7 @@ recursive reference specification hit a JS memory/stack fault on a million-byte
 probe, while its native probe passed. See [the specification audit](CORRECTNESS.md#specification-audit-and-domain-qualification)
 for this resource limitation and remaining specification-hardening opportunities.
 
-## Latest completed research run
+## Previous parallel-scored research run
 
 Run `20260918T194829Z-b4cc8b` ended for publication with `plateau` after 6 iterations.
 The best retained CPU score was **21.375 ms per normalized suite**,
@@ -402,7 +454,7 @@ universal and vector proofs, 182 differential cases per API on JS/native, and
 three negative public-mutation proof checks. Only the retained winner is exported;
 failed, rejected and unreviewed candidates remain archived in the local run.
 
-## Lean versus Bend SHA-256 benchmark
+## Historical Lean versus Bend benchmark (b3ce430)
 
 Measured on the same Apple M4 with identical deterministic inputs: 8 MiB per
 workload at 64-, 1,024-, 16,384- and 65,536-byte message sizes, or 32 MiB per suite.

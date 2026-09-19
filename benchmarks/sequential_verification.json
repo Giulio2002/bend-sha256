@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-19",
+  "source_sha256": {
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "sha256.bend": "b77e36f3cb077c6648445a9d8112ce71a4f31fe9c532ca4aa7da33b1b5f6d8cd",
+    "conformance.bend": "ac73be1570a094e4c429c13f25d94dabd2cff52c072377cfeedd468c78522e47",
+    "CORRECTNESS.bend": "e68004d2567e2649e339f0a5c7b106913f3cb4d571fbde8737d9095570469a18",
+    "list_proofs.bend": "b71b8a1223944f86b31fce2e1c60fe31b15fc20b320e9fe2364c440c553cd75f",
+    "padding_proof.bend": "ed0f9b4069d3bb2f956adb2d3c53ebe0880cf564beffa37a53b0ea02ba622eff"
+  },
+  "proof": "All five unchanged public claims checked against independent frozen FIPS specification; no new assumptions, unsafe code or holes",
+  "full_gate": "Passed again before publication: universal and four concrete proofs, 182 cases per API per backend, three executable public mutants rejected",
+  "extra_differential": {
+    "native": {
+      "random_messages": 132,
+      "both_apis": true,
+      "high_u32_each_case": true,
+      "large_length_cases": 19,
+      "largest_message_bytes": 4194304
+    },
+    "JS": {
+      "random_messages": 132,
+      "both_apis": true,
+      "high_u32_each_case": true,
+      "large_length_cases": 19,
+      "largest_message_bytes": 4194304
+    }
+  },
+  "targeted_negative_proofs": [
+    {
+      "mutation": "length_word",
+      "rejected_at": "conformance.stream_correct"
+    },
+    {
+      "mutation": "literal_round",
+      "rejected_at": "conformance.kr16_correct"
+    },
+    {
+      "mutation": "tail_55",
+      "rejected_at": "conformance.stream_correct"
+    },
+    {
+      "mutation": "tail_56",
+      "rejected_at": "conformance.stream_correct"
+    }
+  ],
+  "specialized_constants": "All 64 literal round constants independently compared with frozen FIPS constants",
+  "unit_tests": 22,
+  "performance": {
+    "historical_baseline_normalized_ms": 117,
+    "approved_winner_normalized_ms": 26.5,
+    "repeats": 3
+  },
+  "limitations": [
+    "No claim to exhaustively execute every possible input; universal theorem provides arbitrary-input equivalence within its trust boundary.",
+    "Bend checker, Base semantics and FIPS transcription remain trusted; compiler and hardware not formally verified.",
+    "Large unrolled code and exhaustive final-tail cases increase compilation cost.",
+    "Latest 3.6 percent incremental gain is small; its exact size is uncertain.",
+    "Comparison timings may be affected by other host workloads; both implementations measured sequentially."
+  ]
+}

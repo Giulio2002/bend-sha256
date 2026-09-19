@@ -1,0 +1,357 @@
+{
+  "lean_commit": "4310886800df03d5850ae5aed170c5611548f921",
+  "lean_version": "4.29.1",
+  "bend_version": "2.0.5",
+  "bend_source_sha256": {
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "sha256.bend": "b77e36f3cb077c6648445a9d8112ce71a4f31fe9c532ca4aa7da33b1b5f6d8cd",
+    "conformance.bend": "ac73be1570a094e4c429c13f25d94dabd2cff52c072377cfeedd468c78522e47",
+    "CORRECTNESS.bend": "e68004d2567e2649e339f0a5c7b106913f3cb4d571fbde8737d9095570469a18",
+    "list_proofs.bend": "b71b8a1223944f86b31fce2e1c60fe31b15fc20b320e9fe2364c440c553cd75f",
+    "padding_proof.bend": "ed0f9b4069d3bb2f956adb2d3c53ebe0880cf564beffa37a53b0ea02ba622eff"
+  },
+  "lean_c_flags": [
+    "-O3",
+    "-march=native"
+  ],
+  "corpus_bytes_per_workload": 8388608,
+  "corpus_sha256": "db62a84f070a6900a1e402ac49fef452bd1cb0cc9d8cb802c1762c5779981a1e",
+  "platform": "macOS-15.6-arm64-arm-64bit",
+  "method": "Both sequential native CPU. 3 suites, 1 warmup and 5 measured samples per workload, fresh processes, alternating backend order within each workload. Four message sizes, identical 8 MiB corpus. All digest outputs verified against hashlib. Build/startup/loading/chunking/formatting/output excluded; hashing and result allocation/retention included. Other host workloads may run.",
+  "results": [
+    {
+      "repeat": 0,
+      "backend": "lean_c_optimized",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            1399.844833,
+            1419.782041,
+            1489.2575,
+            1578.7975,
+            1676.404125
+          ],
+          "median_ms": 1489.2575
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            871.169667,
+            793.502875,
+            766.564334,
+            828.879208,
+            846.144584
+          ],
+          "median_ms": 828.879208
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            731.810958,
+            778.9005,
+            751.588333,
+            803.540625,
+            839.046667
+          ],
+          "median_ms": 778.9005
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            810.903458,
+            804.122666,
+            672.839166,
+            734.602459,
+            691.631667
+          ],
+          "median_ms": 734.602459
+        }
+      ],
+      "total_ms": 3831.639667
+    },
+    {
+      "repeat": 0,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            124.0,
+            116.0,
+            115.0,
+            119.0,
+            110.0
+          ],
+          "median_ms": 116.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            94.0,
+            83.0,
+            91.0,
+            78.0,
+            83.0
+          ],
+          "median_ms": 83.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            82.0,
+            84.0,
+            87.0,
+            78.0,
+            80.0
+          ],
+          "median_ms": 82.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            74.0,
+            140.0,
+            95.0,
+            102.0,
+            81.0
+          ],
+          "median_ms": 95.0
+        }
+      ],
+      "total_ms": 376.0
+    },
+    {
+      "repeat": 1,
+      "backend": "lean_c_optimized",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            1365.983708,
+            1373.904208,
+            1601.734458,
+            1375.467292,
+            1499.238958
+          ],
+          "median_ms": 1375.467292
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            722.997625,
+            640.779792,
+            711.523125,
+            749.886208,
+            757.912583
+          ],
+          "median_ms": 722.997625
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            866.733375,
+            797.214833,
+            818.804417,
+            671.332125,
+            785.212125
+          ],
+          "median_ms": 797.214833
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            844.534542,
+            745.832917,
+            702.035667,
+            737.748167,
+            749.346041
+          ],
+          "median_ms": 745.832917
+        }
+      ],
+      "total_ms": 3641.512667
+    },
+    {
+      "repeat": 1,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            112.0,
+            121.0,
+            118.0,
+            113.0,
+            105.0
+          ],
+          "median_ms": 113.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            82.0,
+            68.0,
+            74.0,
+            80.0,
+            111.0
+          ],
+          "median_ms": 80.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            121.0,
+            86.0,
+            97.0,
+            91.0,
+            84.0
+          ],
+          "median_ms": 91.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            73.0,
+            79.0,
+            73.0,
+            75.0,
+            66.0
+          ],
+          "median_ms": 73.0
+        }
+      ],
+      "total_ms": 357.0
+    },
+    {
+      "repeat": 2,
+      "backend": "lean_c_optimized",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            1504.2445,
+            1453.691417,
+            1481.479375,
+            1459.9215,
+            1592.594166
+          ],
+          "median_ms": 1481.479375
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            747.773916,
+            817.383292,
+            807.235042,
+            686.589791,
+            674.727208
+          ],
+          "median_ms": 747.773916
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            605.261,
+            601.294958,
+            664.293958,
+            699.398542,
+            663.004958
+          ],
+          "median_ms": 663.004958
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            508.137041,
+            488.039958,
+            567.611417,
+            491.04925,
+            477.6355
+          ],
+          "median_ms": 491.04925
+        }
+      ],
+      "total_ms": 3383.307499
+    },
+    {
+      "repeat": 2,
+      "backend": "bend_sequential",
+      "workloads": [
+        {
+          "message_bytes": 64,
+          "messages": 131072,
+          "samples_ms": [
+            99.0,
+            97.0,
+            107.0,
+            108.0,
+            98.0
+          ],
+          "median_ms": 99.0
+        },
+        {
+          "message_bytes": 1024,
+          "messages": 8192,
+          "samples_ms": [
+            72.0,
+            81.0,
+            71.0,
+            92.0,
+            84.0
+          ],
+          "median_ms": 81.0
+        },
+        {
+          "message_bytes": 16384,
+          "messages": 512,
+          "samples_ms": [
+            69.0,
+            67.0,
+            76.0,
+            66.0,
+            69.0
+          ],
+          "median_ms": 69.0
+        },
+        {
+          "message_bytes": 65536,
+          "messages": 128,
+          "samples_ms": [
+            71.0,
+            64.0,
+            66.0,
+            64.0,
+            60.0
+          ],
+          "median_ms": 64.0
+        }
+      ],
+      "total_ms": 313.0
+    }
+  ],
+  "median_suite_ms": {
+    "lean_c_optimized": 3641.512667,
+    "bend_sequential": 357.0
+  }
+}
