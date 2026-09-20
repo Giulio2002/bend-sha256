@@ -19,6 +19,43 @@ import Base
 import 0xda83506fb9f059ead7afcfa2f498df5f/sha256.bend as SHA
 ```
 
+### Add it to your project
+
+With Bend installed (`bend` on your PATH; tested with 2.0.16), save this as
+`main.bend` in your project. The content-hash import downloads the package through
+BendHub; you do not need to clone this repository or copy its source files.
+
+```bend
+import Base
+import 0xda83506fb9f059ead7afcfa2f498df5f/sha256.bend as SHA
+
+def show(r: Maybe<&1,Array<U32>>) -> String:
+  match r:
+    case None{}: "invalid length"
+    case Some{digest}: SHA.hex(digest)
+
+def main() -> IO(Unit):
+  # 0x61626300 packs "abc" into one big-endian word; length excludes the last byte.
+  IO.print(show(SHA.sha256(Array.new(U32,0n,1633837824),3n)))
+```
+
+Run it:
+
+```sh
+bend main.bend
+```
+
+Expected digest:
+
+```text
+ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+```
+
+Keep the hash in your imports to pin this exact package. The corresponding
+[GitHub release is v0.1.0](https://github.com/Giulio2002/bend-sha256/releases/tag/v0.1.0).
+
+### Import the proofs or publish an update
+
 The package includes the checked proof modules and specifications. To import the
 entry module that also checks those proofs, use:
 
