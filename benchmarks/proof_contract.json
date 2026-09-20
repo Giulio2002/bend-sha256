@@ -1,17 +1,24 @@
 {
-  "version": 2,
+  "version": 3,
   "frozen_sha256": {
     "fips.bend": "f11c04cc7e6c319ead48623f73ffb7353fedf3f8ce8751b9330be27aad541ba8",
     "state.bend": "24b4bb267fe94bd1615a8cff6aa090fff766c9009b5f9aa1c08a865b87d06230",
-    "LAWS.bend": "a18ba4a1d2632b5b3c20ef265e958bfae3d2af05aa1b8db853a610e63d7a57be",
+    "LAWS.bend": "dcfb8abe7389a7220f2a993482631312de2858a0942f4edff7557f1d499fa7c1",
     "PROOF.bend": "fce0a40d3799598812f4c215753a61b84d56f072e9cabeac597721dad35da000",
     "test_sha256.py": "84bd7d3c92e8e7ad683e053fa26f7999c0cc8385fdb20821136a75d7f890898d",
-    "research_validate.py": "6d766c1736ca1882139947b51740f2788cd477716a2373c7451aec1a81927af6",
-    "benchmark_sha256.py": "20999c41812f3aa6515b5a38bb6fa858f16075da4b6f41b5163fdecb5173b085",
+    "research_validate.py": "cc3e2d9d57753dac148398cefa7718ca766cc5df5e9efa2842b724dac240f2f5",
+    "benchmark_sha256.py": "48bb5a38f43a1ea3b6db35070700a132e2b135d5cacae6558fc5649898328e30",
     "benchmarks/driver.bend": "d6c73df3c6ad6a18af2e4f754eb383ca397e1d13cad833f516b543e4e8672709",
     "pyproject.toml": "527cafbfc3af4b1ef0c33939a95eb0bc4f985ce2f7ecf5cfd61fb8f61408f334",
     "uv.lock": "ae211662260fb93a1bd6cacd7bf538abd4692a64092f5c75d3957b662ce51a90",
-    "benchmarks/gpu_driver.bend": "0db79ad33ad5c0e2736bccc0ba3698e7cb3c60f8bf1fc18e46962a7e79d91598"
+    "benchmarks/gpu_driver.bend": "0db79ad33ad5c0e2736bccc0ba3698e7cb3c60f8bf1fc18e46962a7e79d91598",
+    "packed_spec.bend": "ab15b6de9db5f5b1cce5a1cc773ce9cb1fc9fc074c7857484fda58be576c81d7",
+    "tools/test_packed.py": "f24e9327f930cc2bf86a7f9a20c39c571996e09627e25769082c15dcff4092f3",
+    "tools/check_packed_mutations.py": "95c375c5dc75b61d090f6d800467610a5f211fded3961aa4a3ec49dc55d19696",
+    "tools/benchmark_packed.py": "7c0381a2950e8a9a22c4f74d030743e0b5cb2b0d4178fa52fb4324d9208deb0e",
+    "benchmarks/list_driver.bend": "2b4c5d4593b62e8a29f59dbb60aaed6d7f30d16810d22586e9e876aaebd0bf65",
+    "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
+    "benchmarks/packed_input.bend": "1887a3752f6d49673014d9e00af1d888ced8abab238b34176b779146bc57b3d7"
   },
   "imports": {
     "core.bend": [
@@ -21,6 +28,7 @@
     "sha256.bend": [
       "Base",
       "./core.bend as Core",
+      "./packed.bend as Packed",
       "./conformance.bend as Proof"
     ],
     "conformance.bend": [
@@ -44,7 +52,26 @@
       "./sha256.bend as SHA",
       "./fips.bend as FIPS",
       "./conformance.bend as Conformance",
+      "./packed_proof.bend as PackedProof",
       "./LAWS.bend as Laws"
+    ],
+    "packed.bend": [
+      "Base",
+      "./core.bend as Core",
+      "./state.bend as S"
+    ],
+    "packed_proof.bend": [
+      "Base",
+      "./packed_array_proof.bend as A",
+      "./packed.bend as P",
+      "./packed_spec.bend as R",
+      "./core.bend as C",
+      "./fips.bend as F",
+      "./state.bend as S",
+      "./conformance.bend as Conformance"
+    ],
+    "packed_array_proof.bend": [
+      "Base"
     ]
   },
   "public_proof_definitions": [
@@ -52,6 +79,7 @@
     "Laws.sha256_correct",
     "Laws.digest_bytes_correct",
     "Laws.sha256_bytes_correct",
-    "Laws.sha256_bytes_length"
+    "Laws.sha256_bytes_length",
+    "Laws.sha256_packed_correct"
   ]
 }

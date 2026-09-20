@@ -1,5 +1,6 @@
 import Base
 import ./core.bend as Core
+import ./packed.bend as Packed
 import ./conformance.bend as Proof
 
 # The core refinement theorem quantifies over every constant table.
@@ -44,3 +45,8 @@ def digest_bytes(ws: List<&2, U32>) -> List<&2, U32>:
 
 def sha256_bytes(bytes: List<&2, U32>) -> List<&2, U32>:
   digest_bytes(sha256(bytes))
+
+# Four bytes per U32, big-endian word order. Returns None for an oversized length.
+# This consumes the array; existing list APIs above retain their original behavior.
+def sha256_packed(words: Array<U32>, byte_length: Nat) -> Maybe<&2,List<&2,U32>>:
+  Packed.sha256(words,byte_length)

@@ -1,0 +1,151 @@
+{
+  "host": "Linux-7.0.0-22-generic-x86_64-with-glibc2.43",
+  "binary_sha256": {
+    "list": "d4877990ed6fad877c4768e40f52acd614c980da72c9826e2796979068cfaef7",
+    "packed": "9280b73e840eab0b666a41c19c93dc4f0858c1f1fddff5667425438c8a52e120"
+  },
+  "corpus_bytes": 33554432,
+  "corpus_sha256": "144a558bc1574119ec8332c517653121f4dd278b0680c8a12301bcecbb3d1b98",
+  "timer": "Bend IO.now; milliseconds",
+  "timed": "sequential hashing and digest allocation/retention; excludes loading, packing, startup, printing",
+  "warmups": 1,
+  "samples": 5,
+  "rows": [
+    {
+      "message_bytes": 64,
+      "messages": 524288,
+      "samples_ms": {
+        "list": [
+          592,
+          580,
+          584,
+          421,
+          588
+        ],
+        "packed": [
+          407,
+          407,
+          409,
+          409,
+          404
+        ]
+      },
+      "median_ms": {
+        "list": 584,
+        "packed": 407
+      },
+      "us_per_hash": {
+        "list": 1.1138916015625,
+        "packed": 0.7762908935546875
+      },
+      "speedup": 1.434889434889435,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 1024,
+      "messages": 32768,
+      "samples_ms": {
+        "list": [
+          393,
+          283,
+          395,
+          391,
+          392
+        ],
+        "packed": [
+          204,
+          150,
+          205,
+          204,
+          210
+        ]
+      },
+      "median_ms": {
+        "list": 392,
+        "packed": 204
+      },
+      "us_per_hash": {
+        "list": 11.962890625,
+        "packed": 6.2255859375
+      },
+      "speedup": 1.9215686274509804,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 16384,
+      "messages": 2048,
+      "samples_ms": {
+        "list": [
+          377,
+          376,
+          378,
+          378,
+          391
+        ],
+        "packed": [
+          136,
+          188,
+          195,
+          189,
+          188
+        ]
+      },
+      "median_ms": {
+        "list": 378,
+        "packed": 188
+      },
+      "us_per_hash": {
+        "list": 184.5703125,
+        "packed": 91.796875
+      },
+      "speedup": 2.0106382978723403,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 65536,
+      "messages": 512,
+      "samples_ms": {
+        "list": [
+          375,
+          274,
+          376,
+          376,
+          335
+        ],
+        "packed": [
+          188,
+          186,
+          137,
+          137,
+          189
+        ]
+      },
+      "median_ms": {
+        "list": 375,
+        "packed": 186
+      },
+      "us_per_hash": {
+        "list": 732.421875,
+        "packed": 363.28125
+      },
+      "speedup": 2.0161290322580645,
+      "every_digest_matches": true
+    }
+  ],
+  "cpu": "Intel Xeon Gold 5412U",
+  "c_compiler": "GCC 15.2.0, -O3 -std=c11",
+  "bend": "2.0.16 (unmodified installed compiler)",
+  "hardware_sha_instructions": false,
+  "source_sha256": {
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "packed.bend": "567d68f71be571b0377dad9dfc11063b7771846f2786160e495ec5cbbe2f324c",
+    "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
+    "benchmarks/list_driver.bend": "2b4c5d4593b62e8a29f59dbb60aaed6d7f30d16810d22586e9e876aaebd0bf65",
+    "benchmarks/packed_input.bend": "1887a3752f6d49673014d9e00af1d888ced8abab238b34176b779146bc57b3d7"
+  },
+  "generated_c_sha256": {
+    "packed": "40fd51d690ee05745b1cbf19baf11c8408737751829216856ee69b942ac802db",
+    "list": "f2c6c1789ab48a046f15382ccaccb5d7690a13b184dcfcef145444f6fe5582de"
+  },
+  "caveat": "Shared hosts with other workloads; compiler and operating system differ between hosts."
+}

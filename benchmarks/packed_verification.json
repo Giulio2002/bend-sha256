@@ -1,0 +1,41 @@
+{
+  "compiler": "Bend 2.0.16; unmodified checker and native backend",
+  "proof_gate": "All terms check.",
+  "proof_wall_seconds": 16.89,
+  "proof_peak_rss_bytes": 1773076480,
+  "original_public_law_declarations_unchanged": 5,
+  "new_public_laws": [
+    "sha256_packed_correct"
+  ],
+  "list_cases_per_api_per_backend": 182,
+  "list_apis": [
+    "8-word digest",
+    "32-byte digest"
+  ],
+  "backends": [
+    "JS",
+    "native C"
+  ],
+  "packed_cases_per_backend": 142,
+  "packed_digests": 138,
+  "packed_invalid_lengths": 4,
+  "original_public_mutations_rejected": 3,
+  "packed_mutations_rejected": 5,
+  "mutated_implementations_type_check": true,
+  "hardware_acceleration_added": false,
+  "crypto_ffi_added": false,
+  "source_sha256": {
+    "sha256.bend": "3d287364844d6edd73ffc4d32b052d450fb21bfa8f6f1c5a5914356615e4a77e",
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "fips.bend": "f11c04cc7e6c319ead48623f73ffb7353fedf3f8ce8751b9330be27aad541ba8",
+    "state.bend": "24b4bb267fe94bd1615a8cff6aa090fff766c9009b5f9aa1c08a865b87d06230",
+    "packed.bend": "567d68f71be571b0377dad9dfc11063b7771846f2786160e495ec5cbbe2f324c",
+    "packed_spec.bend": "ab15b6de9db5f5b1cce5a1cc773ce9cb1fc9fc074c7857484fda58be576c81d7",
+    "packed_proof.bend": "ab389a8f0172e4ba415c440dbc90efefc2a28f8b1f1bd468c6433642ae9e9d8d",
+    "packed_array_proof.bend": "e2b75e5120c61f780a0eb7d252d4a16c732f664d4e05aea6688848e4fe50bcd0",
+    "LAWS.bend": "dcfb8abe7389a7220f2a993482631312de2858a0942f4edff7557f1d499fa7c1",
+    "CORRECTNESS.bend": "4fb00829e42e7633df09198e29e98421723afa20924094a204d6887263767d80"
+  },
+  "proof_boundary": "Packed public API equals independent packed-format reference. No universal byte-list-to-packed conversion theorem. Compiler, native array lowering, C toolchain and machine remain trusted.",
+  "harness_regression_tests_passed": 22
+}

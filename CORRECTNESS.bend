@@ -3,6 +3,7 @@ import ./state.bend as State
 import ./sha256.bend as SHA
 import ./fips.bend as FIPS
 import ./conformance.bend as Conformance
+import ./packed_proof.bend as PackedProof
 import ./LAWS.bend as Laws
 
 # This gate contains NO concrete-message test vectors.
@@ -39,3 +40,6 @@ def Laws.sha256_bytes_length(bytes):
   %Equal.sym(List<&2, U32>, SHA.sha256_bytes(bytes), FIPS.sha256_bytes(bytes), Laws.sha256_bytes_correct(bytes)) :
     {List.length(&2, U32, _) == 32n : Nat}
   digest_octets_length(FIPS.blocks(FIPS.prepare(bytes, 48n), FIPS.constants())(FIPS.initial()))
+
+def Laws.sha256_packed_correct(words,byte_length):
+  PackedProof.sha256_correct(words,byte_length)

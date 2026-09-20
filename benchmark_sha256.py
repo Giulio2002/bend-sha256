@@ -145,8 +145,8 @@ def benchmark_once(gpu_mode, corpus_bytes, sequential_only=False):
     backends = python_backends()  # Require all three, never silently skip a missing competitor.
     env = {**os.environ, "BEND_NO_TELEMETRY": "1"}
     version = run(["bend", "--version"], env=env).strip()
-    if version != "bend 2.0.5":
-        raise RuntimeError(f"Expected pinned Bend 2.0.5, got {version!r}")
+    if version != "bend 2.0.16":
+        raise RuntimeError(f"Expected pinned Bend 2.0.16, got {version!r}")
     hardware = gpu_hardware() if gpu_mode != "off" else {"available": False, "reason": "Disabled explicitly"}
     if gpu_mode == "required" and not hardware["available"]:
         raise RuntimeError("GPU required but unavailable: " + hardware.get("reason", "No Metal device"))

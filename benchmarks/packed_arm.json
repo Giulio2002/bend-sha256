@@ -1,0 +1,151 @@
+{
+  "host": "macOS-15.6-arm64-arm-64bit",
+  "binary_sha256": {
+    "list": "f6b807ed027ac06dde1869dfbbdaddf1aeca8a959a1d508cfe94dc1aa76a963d",
+    "packed": "4f6c80eae077ba6dc62230d566c9300d94669adc874a924f4f36e067bd813996"
+  },
+  "corpus_bytes": 33554432,
+  "corpus_sha256": "144a558bc1574119ec8332c517653121f4dd278b0680c8a12301bcecbb3d1b98",
+  "timer": "Bend IO.now; milliseconds",
+  "timed": "sequential hashing and digest allocation/retention; excludes loading, packing, startup, printing",
+  "warmups": 1,
+  "samples": 5,
+  "rows": [
+    {
+      "message_bytes": 64,
+      "messages": 524288,
+      "samples_ms": {
+        "list": [
+          377,
+          381,
+          435,
+          389,
+          362
+        ],
+        "packed": [
+          238,
+          237,
+          270,
+          264,
+          257
+        ]
+      },
+      "median_ms": {
+        "list": 381,
+        "packed": 257
+      },
+      "us_per_hash": {
+        "list": 0.7266998291015625,
+        "packed": 0.4901885986328125
+      },
+      "speedup": 1.482490272373541,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 1024,
+      "messages": 32768,
+      "samples_ms": {
+        "list": [
+          277,
+          288,
+          298,
+          282,
+          253
+        ],
+        "packed": [
+          129,
+          122,
+          126,
+          124,
+          132
+        ]
+      },
+      "median_ms": {
+        "list": 282,
+        "packed": 126
+      },
+      "us_per_hash": {
+        "list": 8.60595703125,
+        "packed": 3.84521484375
+      },
+      "speedup": 2.238095238095238,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 16384,
+      "messages": 2048,
+      "samples_ms": {
+        "list": [
+          240,
+          194,
+          190,
+          199,
+          207
+        ],
+        "packed": [
+          103,
+          92,
+          82,
+          87,
+          89
+        ]
+      },
+      "median_ms": {
+        "list": 199,
+        "packed": 89
+      },
+      "us_per_hash": {
+        "list": 97.16796875,
+        "packed": 43.45703125
+      },
+      "speedup": 2.235955056179775,
+      "every_digest_matches": true
+    },
+    {
+      "message_bytes": 65536,
+      "messages": 512,
+      "samples_ms": {
+        "list": [
+          206,
+          203,
+          208,
+          209,
+          206
+        ],
+        "packed": [
+          83,
+          85,
+          87,
+          91,
+          87
+        ]
+      },
+      "median_ms": {
+        "list": 206,
+        "packed": 87
+      },
+      "us_per_hash": {
+        "list": 402.34375,
+        "packed": 169.921875
+      },
+      "speedup": 2.367816091954023,
+      "every_digest_matches": true
+    }
+  ],
+  "cpu": "Apple M4",
+  "c_compiler": "Apple clang 17, -O3 -std=c11",
+  "bend": "2.0.16 (unmodified installed compiler)",
+  "hardware_sha_instructions": false,
+  "source_sha256": {
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "packed.bend": "567d68f71be571b0377dad9dfc11063b7771846f2786160e495ec5cbbe2f324c",
+    "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
+    "benchmarks/list_driver.bend": "2b4c5d4593b62e8a29f59dbb60aaed6d7f30d16810d22586e9e876aaebd0bf65",
+    "benchmarks/packed_input.bend": "1887a3752f6d49673014d9e00af1d888ced8abab238b34176b779146bc57b3d7"
+  },
+  "generated_c_sha256": {
+    "packed": "40fd51d690ee05745b1cbf19baf11c8408737751829216856ee69b942ac802db",
+    "list": "f2c6c1789ab48a046f15382ccaccb5d7690a13b184dcfcef145444f6fe5582de"
+  },
+  "caveat": "Shared hosts with other workloads; compiler and operating system differ between hosts."
+}

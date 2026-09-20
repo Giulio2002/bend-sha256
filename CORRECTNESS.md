@@ -185,3 +185,51 @@ schedule-length and round-count invariants remain possible hardening work;
 this audit does not claim those additional laws have been proved. The existing
 proof is equivalence to the explicit specification, whose transcription remains
 within the documented trust boundary.
+
+## Packed-array API
+
+The additional public theorem is:
+
+```text
+for every words : Array<U32>, byte_length : Nat,
+SHA.sha256_packed(words, byte_length)
+  = PackedSpec.sha256(words, byte_length).
+```
+
+`packed_spec.bend` imports only Base, `fips.bend`, and the neutral state record.
+It gathers blocks with a generic countdown/list accumulator, specifies padding
+in packed big-endian words, and calls the independent FIPS schedule and
+compression. It does not import the optimized implementation. The theorem
+covers the actual public wrapper, array reads and their order, complete-block
+iteration, final one/two-block processing, length bounds, and digest extraction.
+Bounds and storage semantics follow Base.Array; normal native callers should
+construct balanced arrays with Array.new.
+
+`packed_proof.bend` reuses the existing compression refinement lemmas. It proves
+all sixteen reader steps, each padding equation, block induction, bounds
+selection, and output conversion. Internal lemmas quantify the expansion count;
+the public entry point fixes it to 48. Keeping that count symbolic prevents the
+checker from repeatedly expanding 64 concrete SHA rounds. It does not change
+the public round count or assume compression correctness.
+
+`packed_array_proof.bend` constructs a duplicable mathematical description of
+any linear array **with a proof that reconstructing it yields that exact
+array**. This permits the block proof to use an array description more than
+once without violating Bend's affine rules. It is proof-only: hashing does not
+copy arrays or traverse this tree. Neither the proof checker nor Base was
+modified, and no axioms or unsafe declarations were added.
+
+The packed theorem targets the packed-format reference. It is not a theorem
+that an arbitrary byte-list-to-array conversion followed by packed hashing equals
+`FIPS.sha256` on that list. In particular, `benchmarks/packed_input.bend` is a
+measurement helper, not a verified conversion API. Padding's correspondence to
+the byte-level standard is supported by reviewed equations and differential
+tests, while equivalence of optimized packed execution to the packed reference
+is machine checked. The original all-input byte-list-to-FIPS theorem remains
+unchanged and checked.
+
+All statements are source-level functional correctness. They do not verify the
+Bend compiler's native array lowering, C compiler, allocator, CPU, timing,
+side-channel behavior, or out-of-memory behavior. The stock backend's finite
+runtime integer and allocation limits still apply. Native/JS differential tests
+exercise these trusted components; they are not a proof of those components.

@@ -1,0 +1,32 @@
+[
+  {
+    "mutation": "padding marker",
+    "rejected": true,
+    "proof_location": "packed_proof.partial_correct",
+    "seconds": 25.89063375
+  },
+  {
+    "mutation": "partial-byte mask",
+    "rejected": true,
+    "proof_location": "packed_proof.partial_correct",
+    "seconds": 36.092641625
+  },
+  {
+    "mutation": "word index",
+    "rejected": true,
+    "proof_location": "packed_proof.read1_correct",
+    "seconds": 48.749077042
+  },
+  {
+    "mutation": "bounds check",
+    "rejected": true,
+    "proof_location": "packed_proof.sized_correct",
+    "seconds": 17.66556583399999
+  },
+  {
+    "mutation": "compression word order",
+    "rejected": true,
+    "proof_location": "packed_proof.read16_correct",
+    "seconds": 18.27499020900001
+  }
+]

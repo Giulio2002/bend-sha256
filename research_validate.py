@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent
 CONTRACT = ROOT / "benchmarks" / "proof_contract.json"
-EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend")
+EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend", "packed.bend", "packed_proof.bend", "packed_array_proof.bend")
 
 
 def code_only(text):
@@ -101,13 +101,15 @@ def main():
     if sys.flags.optimize:
         raise RuntimeError("Validation requires Python assertions enabled")
     version = checked(["bend", "--version"]).strip()
-    if version != "bend 2.0.5":
-        raise RuntimeError(f"Expected Bend 2.0.5, got {version}")
+    if version != "bend 2.0.16":
+        raise RuntimeError(f"Expected Bend 2.0.16, got {version}")
     audit()
     # This executes both CORRECTNESS and PROOF, plus all 182 cases on both backends.
     print(checked([sys.executable, "test_sha256.py", "--native", "--skip-mutations"]), end="", flush=True)
     public_mutations()
-    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 cases per API on JS/native, 3 rejected public mutations", flush=True)
+    print(checked([sys.executable, "tools/test_packed.py", "--native"]), end="", flush=True)
+    print(checked([sys.executable, "tools/check_packed_mutations.py"]), end="", flush=True)
+    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 cases per API on JS/native, 3 rejected list mutations, 142 packed cases on JS/native, 5 rejected packed mutations", flush=True)
 
 
 if __name__ == "__main__":

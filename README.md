@@ -1,9 +1,87 @@
 # SHA-256 in Bend, with an all-input correctness proof
 
-Pure Bend 2.0.5 implementation, formally verified for functional correctness
+Pure Bend implementation (release checked with Bend 2.0.16), formally verified for functional correctness
 against a separate executable specification of byte-oriented SHA-256 from
-FIPS 180-4. The universal proof covers preprocessing and the complete digest
+FIPS 180-4. For the byte-list API, the universal proof covers preprocessing and the complete digest
 computation. No external cryptographic library computes the Bend hash.
+
+## Packed input without hardware acceleration
+
+`sha256_packed(words: Array<U32>, byte_length: Nat)` hashes a prefix of a
+consumed array and returns `Maybe<&2, List<&2, U32>>`: `Some` contains the eight
+SHA-256 digest words, and `None` means the declared prefix exceeds the array's
+byte capacity. Each U32 stores four bytes in big-endian order. Unused low bytes
+of the last word and unused array slots are ignored; callers need not zero them.
+
+```bend
+# The three bytes "abc", packed into one word. Capacity = four bytes.
+SHA.sha256_packed(Array.new(U32, 0n, 1633837824), 3n)
+# Some{[the eight digest words for SHA-256("abc")]}
+```
+
+Use balanced arrays created by `Array.new`; its depth argument allocates 2^depth
+words. This API accepts packed U32 storage, not a raw byte pointer. It does not
+add incremental hashing, crypto FFI, SHA instruction intrinsics, or a compiler
+fork. Existing list and 32-byte digest APIs remain unchanged. On the native C
+backend, closed U32 array reads use contiguous word storage instead of walking
+four list nodes per input word. Compression is the existing scalar Bend SHA-256.
+
+The new public law proves this actual exported API equals `packed_spec.sha256`
+for every array and logical length in Bend's semantics. The packed specification
+uses a generic list block reader and the independent FIPS schedule/compression.
+The five existing list/serialization laws are unchanged. **There is not yet a
+universal theorem connecting arbitrary byte-list packing to the original
+byte-list FIPS specification.** The test/benchmark packing helper is outside the
+proved API and outside benchmark timing. See [the exact proof boundary](CORRECTNESS.md#packed-array-api).
+
+Validate the complete release:
+
+```sh
+bend CORRECTNESS.bend
+python3 test_sha256.py --native
+python3 tools/test_packed.py --native
+python3 tools/check_packed_mutations.py
+```
+
+The packed tests use dirty unused bytes/slots, all lengths 0–129, larger block
+boundaries through 64 KiB, and invalid lengths. Negative checks change the
+padding marker, partial-word mask, reader index, bounds comparison, and word
+order while keeping the specification and proof fixed.
+
+To reproduce the software-only sequential comparison:
+
+```sh
+bend benchmarks/list_driver.bend -o /tmp/sha-list
+bend benchmarks/packed_driver.bend -o /tmp/sha-packed
+python3 tools/benchmark_packed.py --list /tmp/sha-list --packed /tmp/sha-packed --output /tmp/sha-results.json
+```
+
+The native builds use the stock compiler's `-O3` C build. Each workload hashes
+32 MiB of deterministic input, with one warmup and five alternating measured
+batches. Every digest is checked against Python's `hashlib`. Timing includes
+hashing and digest allocation/retention, and excludes startup, loading, input
+packing, and printing. A caller starting with a byte list must also pay packing
+cost; these measurements do not claim that conversion is free.
+
+### Software-only native measurements
+
+| Message | ARM packed | Intel packed | ARM / Intel speedup | ARM improvement over list | Intel improvement over list |
+|---|---:|---:|---:|---:|---:|
+| 64 B | 0.490 µs | 0.776 µs | 1.58× | 1.48× | 1.43× |
+| 1,024 B | 3.845 µs | 6.226 µs | 1.62× | 2.24× | 1.92× |
+| 16,384 B | 43.457 µs | 91.797 µs | 2.11× | 2.24× | 2.01× |
+| 65,536 B | 169.922 µs | 363.281 µs | 2.14× | 2.37× | 2.02× |
+
+Apple M4 with Apple Clang 17 versus an actual Intel Xeon Gold 5412U with GCC
+15.2.0; both `-O3 -std=c11`. These are host/build comparisons, not an isolated
+ISA comparison. Both hosts had other workloads; raw samples show that variance.
+[ARM samples and provenance](benchmarks/packed_arm.json) ·
+[Intel samples and provenance](benchmarks/packed_intel.json).
+
+The complete source-level correctness gate checked in 16.89 seconds on the M4
+(1.65 GiB peak RSS). This includes the existing proofs and the new packed laws;
+proof checking is separate from native compilation and runtime benchmarks.
+[Release verification record](benchmarks/packed_verification.json).
 
 ## Current sequential implementation and verification
 
@@ -60,7 +138,7 @@ uv run --frozen python benchmark_sha256.py --gpu off --sequential-only
 
 Requirements:
 
-- Bend 2.0.5, the proof-capable language. The older Bend 0.2 is not compatible.
+- Bend 2.0.16, the proof-capable language used for the packed API release. The older Bend 0.2 is not compatible.
 - Python 3 for the test harness. Only Python's standard library is used.
 - Clang 14 or newer for the optional native backend tests.
 
@@ -169,7 +247,7 @@ ordinary bytes. `SHA.hex` formats digest words as lowercase hexadecimal.
 to bytes before hashing. The formal public theorems cover the eight digest
 words and the 32-byte digest API; text helpers are outside these theorems.
 
-Requires **Bend 2.0.5**, not the older Bend 0.2 language. The optimized
+Requires **Bend 2.0.16**, not the older Bend 0.2 language. The optimized
 implementation uses a rolling schedule window and keeps the input in memory;
 this is not a streaming API. Bend's runtime Nat limit is 2^48−1, with available
 memory imposing a smaller practical bound.

@@ -1,6 +1,7 @@
 import Base
 import ./sha256.bend as SHA
 import ./fips.bend as FIPS
+import ./packed_spec.bend as PackedSpec
 
 # These claims mention the actual public API and the complete independent spec.
 # There are no arbitrary preprocessing functions, tables, or correctness premises.
@@ -22,3 +23,9 @@ law sha256_bytes_correct:
 law sha256_bytes_length:
   for +bytes: List<&2, U32>
   {List.length(&2, U32, SHA.sha256_bytes(bytes)) == 32n : Nat}
+
+# A separate packed-format contract; the original list-to-FIPS theorem is unchanged.
+law sha256_packed_correct:
+  for words: Array<U32>
+  for +byte_length: Nat
+  {SHA.sha256_packed(words,byte_length) == PackedSpec.sha256(words,byte_length) : Maybe<&2,List<&2,U32>>}

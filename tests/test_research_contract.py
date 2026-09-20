@@ -104,7 +104,7 @@ class ContractTests(unittest.TestCase):
             else:
                 value = 1
             return {'median_ms': value, 'samples_ms': [value] * 5}
-        with patch.object(benchmark, 'run', return_value='bend 2.0.5'), \
+        with patch.object(benchmark, 'run', return_value='bend 2.0.16'), \
              patch.object(benchmark, 'gpu_hardware', return_value={'available': True, 'backend': 'test'}), \
              patch.object(benchmark, 'native_samples', side_effect=timing), \
              patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
@@ -116,7 +116,7 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(result['bend_gpu_total_ms'], 4)
 
     def test_gpu_off_keeps_parallel_cpu_without_hardware_detection(self):
-        with patch.object(benchmark, 'run', return_value='bend 2.0.5'), \
+        with patch.object(benchmark, 'run', return_value='bend 2.0.16'), \
              patch.object(benchmark, 'gpu_hardware', side_effect=AssertionError('GPU detection must not run')), \
              patch.object(benchmark, 'native_samples', return_value={'median_ms': 100, 'samples_ms': [100] * 5}) as timing, \
              patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
@@ -129,7 +129,7 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(call.args[-2:], ('--gpu', 'off'))
 
     def test_sequential_only_never_builds_or_measures_parallel(self):
-        with patch.object(benchmark, 'run', return_value='bend 2.0.5') as run, \
+        with patch.object(benchmark, 'run', return_value='bend 2.0.16') as run, \
              patch.object(benchmark, 'gpu_hardware', side_effect=AssertionError('No GPU detection')), \
              patch.object(benchmark, 'native_samples', return_value={'median_ms': 100, 'samples_ms': [100] * 5}) as timing, \
              patch.object(benchmark, 'measure_python', return_value={'median_ms': 0.5, 'samples_ms': [0.5] * 5}), \
