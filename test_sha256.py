@@ -131,7 +131,7 @@ def main():
         from research_validate import public_mutations
         public_mutations()
     vectors = cases()
-    source = "import Base\nimport ../sha256.bend as SHA\n\n"
+    source = "import Base\nimport ../legacy_model.bend as SHA\n\n"
     source += "def repeat(n: Nat, acc: List<&2, U32>) -> List<&2, U32>:\n"
     source += "  match n:\n    case 0n:\n      acc\n    case 1n+p:\n      repeat(p, 97 <> acc)\n\n"
     expressions = []

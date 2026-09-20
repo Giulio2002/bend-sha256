@@ -1,47 +1,48 @@
 # SHA-256 in Bend
 
 Pure Bend SHA-256 with machine-checked source-level correctness proofs.
-The byte-list API is proved equivalent to an independent executable FIPS 180-4
+The historical byte-list proof model is proved equivalent to an independent executable FIPS 180-4
 specification for every input list, including padding and the complete digest.
-The packed-array API has a separate universal packed-format refinement theorem.
+The production packed-array API has a universal packed-format refinement theorem,
+plus checked digest word-order and eight-word size laws.
 No crypto FFI, hardware SHA intrinsics, compiler fork, added axioms, or unsafe
 proof declarations are used. Checked with stock **Bend 2.0.16**.
 
-## API
+## API (breaking change: packed arrays only)
+
+The production API no longer accepts or returns linked lists:
 
 ```bend
 import Base
 import ./sha256.bend as SHA
 
+def show(r: Maybe<&1,Array<U32>>) -> String:
+  match r:
+    case None{}: "invalid length"
+    case Some{digest}: SHA.hex(digest)
+
 def main() -> IO(Unit):
-  IO.print(SHA.hex(SHA.sha256([97, 98, 99])))
+  # One big-endian word contains "abc" and an ignored low byte.
+  IO.print(show(SHA.sha256(Array.new(U32,0n,1633837824),3n)))
 ```
 
-This prints SHA-256("abc"):
-`ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad`.
+`SHA.sha256(Array<U32>, byte_length: Nat)` consumes packed input and returns
+`Maybe<&1,Array<U32>>`: exactly eight big-endian U32 words (32 digest bytes),
+or `None` when the declared byte length exceeds the array's byte capacity.
+Four input bytes occupy each word. Unused low bytes and trailing capacity are
+ignored. Construct balanced input arrays with `Array.new`; capacity is 2^depth
+words. `SHA.hex` consumes an eight-word digest for display.
 
-| Function | Input | Result |
-|---|---|---|
-| `SHA.sha256` | `List<&2, U32>`; low eight bits of each element | Eight U32 digest words |
-| `SHA.sha256_bytes` | Same byte list | Exactly 32 octets |
-| `SHA.sha256_packed` | `Array<U32>` and logical byte length | `Some` eight-word digest, or `None` if length exceeds capacity |
-| `SHA.hex` | Digest words | Lowercase hexadecimal |
-| `SHA.ascii` | ASCII text | Byte list; not a UTF-8 encoder |
+The old byte-list `sha256`, `sha256_bytes`, `ascii`, `digest_bytes` and list-result
+`sha256_packed` interfaces are removed. Callers must migrate to packed buffers;
+there is no implicit conversion back to lists. Native input and output use array
+storage; the compression core uses scalar words and a fixed rolling window.
+No crypto FFI or hardware SHA acceleration has been added.
 
-The packed API **consumes** the array. Each word stores four input bytes in
-big-endian order. Only the declared byte prefix is hashed; unused low bytes in
-the last word and unused slots need not be zero. Use balanced arrays created by
-`Array.new(U32, depth, initial)`, whose capacity is 2^depth words.
-
-```bend
-# One packed word holds "abc" followed by an unused zero byte.
-SHA.sha256_packed(Array.new(U32, 0n, 1633837824), 3n)
-```
-
-Native U32 arrays use contiguous word storage, avoiding per-byte linked-list
-traversal. Compression remains the existing scalar Bend implementation, with
-fixed SHA-256 constants and a sixteen-word schedule window. This is a packed
-word API, not a raw byte pointer or incremental I/O API.
+Historical list algorithms survive **only as proof models**, in `core_model.bend`
+and `legacy_model.bend`. The production import graph is `sha256 -> buffer -> packed
+-> core`, plus the state record and Base; it does not import those models, specs or
+proofs. List-valued specifications remain mathematical proof artifacts.
 
 ## Correctness and verification
 
@@ -54,15 +55,17 @@ python3 tools/check_packed_mutations.py
 uv run --frozen python -m unittest discover -s tests
 ```
 
-The release checks passed:
+Validation includes:
 
-- All five original public laws, unchanged, plus `sha256_packed_correct`.
+- Historical model laws remain checked; `sha256_array_correct` targets the actual
+  array-only public API, and digest word-order and size laws check its output.
 - 182 cases per original API on both JS and native C, including million-`a`.
 - 142 packed cases per backend: 138 digests, dirty unused storage, padding/block
   boundaries through 64 KiB, and four invalid lengths.
-- Three original and five packed implementation mutations rejected by the proofs.
+- Three public array mutations and six packed/output mutations rejected.
+- Production dependency audit: no list storage or imports of proof models.
 
-The full correctness gate checked in 16.89 seconds on the M4, with 1.65 GiB peak
+Before the array-output migration, the full correctness gate checked in 16.89 seconds on the M4, with 1.65 GiB peak
 RSS. The packed proofs keep the expansion count symbolic and use a proved
 representation of linear arrays, without copying arrays in the runtime hash.
 [Verification evidence](benchmarks/packed_verification.json).
@@ -77,6 +80,10 @@ not constitute a proof of them. See [CORRECTNESS.md](CORRECTNESS.md) for the exa
 statements, proof structure, specification mapping, and limits.
 
 ## Benchmark: Bend, hashlib, Go, Lean
+
+The table below records the preceding packed-input/list-digest release. It has not
+been rerun for this breaking array-output API; no new speedup is claimed. The
+four-way runner now invokes the production array API.
 
 This is the single published benchmark suite. **Median microseconds per hash;
 lower is faster.** The Intel rows ran on the actual remote Xeon, not Rosetta.
@@ -137,10 +144,10 @@ comparison or a substitute for this suite.
 
 ## Repository layout
 
-- `sha256.bend`, `core.bend`, `packed.bend`: public API and implementations.
+- `sha256.bend`, `buffer.bend`, `core.bend`, `packed.bend`: array-only runtime.
 - `fips.bend`, `packed_spec.bend`: independent executable specifications.
 - `LAWS.bend`, `CORRECTNESS.bend`: public claims and their checked proofs.
-- `conformance.bend`, `packed_proof.bend`, `packed_array_proof.bend`,
+- `buffer_proof.bend`, `conformance.bend`, `packed_proof.bend`, `packed_array_proof.bend`,
   `list_proofs.bend`, `padding_proof.bend`: supporting universal proofs.
 - `benchmarks/fourway/`, `tools/build_fourway.py`, `tools/benchmark_fourway.py`:
   the four-participant benchmark.

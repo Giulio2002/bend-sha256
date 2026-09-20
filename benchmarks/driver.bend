@@ -1,5 +1,5 @@
 import Base
-import ../sha256.bend as SHA
+import ../legacy_model.bend as SHA
 
 # Trusted measurement driver. Input loading and chunk construction precede timing.
 def chunks(xs: List<&2, U32>, +size: Nat, left: Nat,

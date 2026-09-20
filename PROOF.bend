@@ -1,5 +1,5 @@
 import Base
-import ./sha256.bend as SHA
+import ./legacy_model.bend as SHA
 import ./CORRECTNESS.bend as Correctness
 
 law empty_vector:

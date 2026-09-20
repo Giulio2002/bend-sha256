@@ -27,12 +27,12 @@ def main():
     if imports != ['Base', './fips.bend as F', './state.bend as S']:
         raise RuntimeError(f'Packed specification imports implementation code: {imports}')
     report = []
-    for name, before, after in MUTATIONS:
+    for name, before, after in MUTATIONS + [('digest word order', 'ALeaf{a},ALeaf{b}', 'ALeaf{b},ALeaf{a}')]:
         with tempfile.TemporaryDirectory(prefix='.test-packed-mutation-', dir=ROOT) as tmp:
             target = Path(tmp)
             for source in ROOT.glob('*.bend'):
                 (target / source.name).write_bytes(source.read_bytes())
-            impl = target / 'packed.bend'
+            impl = target / ('buffer.bend' if name == 'digest word order' else 'packed.bend')
             text = impl.read_text()
             if text.count(before) != 1:
                 raise RuntimeError(f'Mutation anchor is not unique: {name}')

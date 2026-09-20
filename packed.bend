@@ -188,12 +188,3 @@ def sized(+length: Nat, pair: Array<U32> & U32) -> Maybe<&2,S.State>:
 # Public bounded API; consumes the input array, without constructing a byte list.
 def hash(a: Array<U32>, length: Nat) -> Maybe<&2,S.State>:
   sized(length,Array.size(U32,a))
-
-# Word digest API; the array is consumed and its declared byte prefix is hashed.
-def digest_result(r: Maybe<&2,S.State>) -> Maybe<&2,List<&2,U32>>:
-  match r:
-    case None{}: None{}
-    case Some{s}: Some{Core.digest(s)}
-
-def sha256(a: Array<U32>, length: Nat) -> Maybe<&2,List<&2,U32>>:
-  digest_result(hash(a,length))

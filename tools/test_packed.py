@@ -48,6 +48,8 @@ def fill(n: Nat, +index: U32, +seed: U32, a: Array<U32>) -> Array<U32>:
 """ + '\n\n'.join(definitions)
     source += '\n\ndef show(r: Maybe<&2,List<&2,U32>>) -> String:\n  match r:\n    case None{}: "NONE"\n    case Some{ws}: SHA.hex(ws)\n\ndef main() -> IO(Unit):\n  do IO<Unit>:\n'
     source += ''.join(f'    IO.print(show(case_{i}()))\n' for i in range(len(expected)))
+    source = source.replace('Maybe<&2,List<&2,U32>>', 'Maybe<&1,Array<U32>>')
+    source = source.replace('SHA.sha256_packed(', 'SHA.sha256(')
     with tempfile.TemporaryDirectory(prefix='.test-packed-', dir=ROOT) as tmp:
         driver = Path(tmp) / 'cases.bend'
         driver.write_text(source)

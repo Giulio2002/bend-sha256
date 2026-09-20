@@ -233,3 +233,20 @@ Bend compiler's native array lowering, C compiler, allocator, CPU, timing,
 side-channel behavior, or out-of-memory behavior. The stock backend's finite
 runtime integer and allocation limits still apply. Native/JS differential tests
 exercise these trusted components; they are not a proof of those components.
+
+## Array-only production API migration
+
+`sha256.bend` now exports packed-input/packed-output `sha256`. The historical
+list laws refer to `legacy_model.bend` solely to retain the original mathematical
+proof development. They are not claims about an exported list API.
+`Laws.sha256_array_correct` and `buffer_proof.correct` relate the actual public
+array function to the independent packed input specification.
+`buffer_proof.digest_words` proves output order against FIPS.digest and
+`digest_size` proves exactly eight U32 words. The implementation never executes
+the proof-only list observation. The previous packed-spec versus byte-spec bridge
+limitation remains; this change does not claim a new universal input-conversion
+bridge. Compiler, native Array lowering, generated C and hardware remain trusted.
+
+`buffer_proof.full_correct` composes the public array result observation with
+the independent `PackedSpec.sha256` digest, including rejection, for every input
+array and length. The array observation is erased proof-only code.

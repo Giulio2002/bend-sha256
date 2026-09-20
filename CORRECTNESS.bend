@@ -1,6 +1,7 @@
 import Base
+import ./buffer_proof.bend as BufferProof
 import ./state.bend as State
-import ./sha256.bend as SHA
+import ./legacy_model.bend as SHA
 import ./fips.bend as FIPS
 import ./conformance.bend as Conformance
 import ./packed_proof.bend as PackedProof
@@ -43,3 +44,6 @@ def Laws.sha256_bytes_length(bytes):
 
 def Laws.sha256_packed_correct(words,byte_length):
   PackedProof.sha256_correct(words,byte_length)
+
+def Laws.sha256_array_correct(words,byte_length):
+  BufferProof.correct(words,byte_length)

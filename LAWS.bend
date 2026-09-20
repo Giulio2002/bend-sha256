@@ -1,5 +1,7 @@
 import Base
-import ./sha256.bend as SHA
+import ./sha256.bend as Runtime
+import ./buffer.bend as Buffer
+import ./legacy_model.bend as SHA
 import ./fips.bend as FIPS
 import ./packed_spec.bend as PackedSpec
 
@@ -29,3 +31,9 @@ law sha256_packed_correct:
   for words: Array<U32>
   for +byte_length: Nat
   {SHA.sha256_packed(words,byte_length) == PackedSpec.sha256(words,byte_length) : Maybe<&2,List<&2,U32>>}
+
+# Actual production array API; historical list laws above concern only its model.
+law sha256_array_correct:
+  for words: Array<U32>
+  for +byte_length: Nat
+  {Runtime.sha256(words,byte_length) == Buffer.result(PackedSpec.hash(words,byte_length)) : Maybe<&1,Array<U32>>}

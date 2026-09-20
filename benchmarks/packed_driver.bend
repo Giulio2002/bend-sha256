@@ -1,5 +1,5 @@
 import Base
-import ../core.bend as SHA
+import ../sha256.bend as SHA
 import ../packed.bend as Packed
 import ../state.bend as S
 import ./packed_input.bend as Input
@@ -15,22 +15,22 @@ def chunks(xs: List<&2, U32>, +size: Nat, left: Nat,
     case h <> t 1n+p:
       chunks(t, size, p, h <> acc, out)
 
-def must(result: Maybe<&2,S.State>) -> List<&2,U32>:
+def must(result: Maybe<&1,Array<U32>>) -> Array<U32>:
   match result:
-    case None{}: Nil{}
-    case Some{s}: SHA.digest(s)
+    case None{}: Array.new(U32,3n,0)
+    case Some{a}: a
 
 def pack_inputs(xs: List<&2,List<&2,U32>>, +size: Nat) -> List<&1,Array<U32>>:
   match xs:
     case Nil{}: Nil{}
     case h <> t: Input.from_list(h,size) <> pack_inputs(t,size)
 
-def hashes(xs: List<&1,Array<U32>>, +size: Nat, acc: List<&2,List<&2,U32>>) -> List<&2,List<&2,U32>>:
+def hashes(xs: List<&1,Array<U32>>, +size: Nat, acc: List<&1,Array<U32>>) -> List<&1,Array<U32>>:
   match xs:
     case Nil{}: acc
-    case h <> t: hashes(t,size,must(Packed.hash(h,size)) <> acc)
+    case h <> t: hashes(t,size,must(SHA.sha256(h,size)) <> acc)
 
-def output(xs: List<&2, List<&2, U32>>) -> IO(Unit):
+def output(xs: List<&1, Array<U32>>) -> IO(Unit):
   match xs:
     case Nil{}:
       IO.pure(Unit, Unit{})
@@ -62,7 +62,7 @@ def main() -> IO(Unit):
     bytes : List<&2, U32> <- loaded(pair)
     inputs : List<&1,Array<U32>> = pack_inputs(chunks(bytes, size, size, Nil{}, Nil{}),size)
     start : Nat <- IO.now()
-    results : List<&2, List<&2, U32>> = hashes(inputs, size, Nil{})
+    results : List<&1, Array<U32>> = hashes(inputs, size, Nil{})
     stop : Nat <- IO.now()
     IO.print("BENCH_MS=" ++ Nat.show(Nat.sub(stop, start)))
     output(results)

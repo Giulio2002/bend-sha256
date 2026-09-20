@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent
 CONTRACT = ROOT / "benchmarks" / "proof_contract.json"
-EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend", "packed.bend", "packed_proof.bend", "packed_array_proof.bend")
+EDITABLE = ("core.bend", "sha256.bend", "conformance.bend", "list_proofs.bend", "padding_proof.bend", "CORRECTNESS.bend", "packed.bend", "packed_proof.bend", "packed_array_proof.bend", "buffer.bend", "buffer_proof.bend", "legacy_model.bend", "core_model.bend")
 
 
 def code_only(text):
@@ -65,36 +65,25 @@ def checked(command, cwd=ROOT, timeout=600, expect_failure=False):
 
 
 def public_mutations():
-    # Rewrite the PUBLIC wrapper, independent of internal implementation text.
     variants = {
-        "zero_digest": "[0, 0, 0, 0, 0, 0, 0, 0]",
-        "prepended_byte": "sha256_original(0 <> bytes)",
-        "reversed_digest": "List.reverse(&2, U32, sha256_original(bytes))",
+        'always_reject': 'None{}',
+        'ignore_length': 'Buffer.sha256(words,0n)',
+        'overwrite_first_word': 'Buffer.sha256(Array.set(U32,words,0,0),byte_length)',
     }
     for label, expression in variants.items():
-        with tempfile.TemporaryDirectory(prefix="bend-sha256-negative-") as directory:
+        with tempfile.TemporaryDirectory(prefix='bend-sha256-negative-') as directory:
             root = Path(directory)
-            for source in ROOT.glob("*.bend"):
-                shutil.copyfile(source, root / source.name)
-            target = root / "sha256.bend"
-            original, count = re.subn(r"^def sha256\(", "def sha256_original(", target.read_text(), count=1, flags=re.M)
-            if count != 1:
-                raise RuntimeError("Cannot locate public sha256 definition for negative proof check")
-            # Bend resolves definitions in order. Insert the mutant immediately
-            # after the renamed original, before dependent APIs such as sha256_bytes.
-            definition = re.search(r"^def sha256_original\([\s\S]*?(?=^(?:def|law|type|import)\b|\Z)", original, re.M)
-            if definition is None:
-                raise RuntimeError("Cannot locate renamed sha256 definition")
-            offset = definition.end()
-            wrapper = "\ndef sha256(bytes: List<&2, U32>) -> List<&2, U32>:\n  " + expression + "\n\n"
-            target.write_text(original[:offset] + wrapper + original[offset:])
-            # Ensure the mutant is executable/type-correct. Rejection must come
-            # from the universal theorem, not a typo in our injected source.
-            (root / "mutation_probe.bend").write_text(
-                'import Base\nimport ./sha256.bend as SHA\n\ndef main() -> IO(Unit):\n  IO.print(SHA.hex(SHA.sha256([97, 98, 99])))\n')
-            checked(["bend", "mutation_probe.bend"], cwd=root)
-            checked(["bend", "CORRECTNESS.bend"], cwd=root, expect_failure=True)
-            print(f"Universal proof rejected public mutation: {label}", flush=True)
+            for source in ROOT.glob('*.bend'):
+                shutil.copyfile(source, root/source.name)
+            p = root/'sha256.bend'
+            source = p.read_text()
+            anchor = 'Buffer.sha256(words,byte_length)'
+            if source.count(anchor) != 1:
+                raise RuntimeError('Public mutation anchor missing or ambiguous')
+            p.write_text(source.replace(anchor, expression))
+            checked(['bend', 'sha256.bend'], cwd=root)
+            checked(['bend', 'CORRECTNESS.bend'], cwd=root, expect_failure=True)
+            print(f'Universal proof rejected public array mutation: {label}', flush=True)
 
 
 def main():
@@ -109,7 +98,7 @@ def main():
     public_mutations()
     print(checked([sys.executable, "tools/test_packed.py", "--native"]), end="", flush=True)
     print(checked([sys.executable, "tools/check_packed_mutations.py"]), end="", flush=True)
-    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 cases per API on JS/native, 3 rejected list mutations, 142 packed cases on JS/native, 5 rejected packed mutations", flush=True)
+    print("RESEARCH VALIDATION PASSED: unchanged universal contract, checked proofs, 182 cases per API on JS/native, 3 rejected public array mutations, 142 packed cases on JS/native, 6 rejected packed/output mutations", flush=True)
 
 
 if __name__ == "__main__":
