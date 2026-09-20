@@ -1,0 +1,256 @@
+{
+  "host": "Linux-7.0.0-22-generic-x86_64-with-glibc2.43",
+  "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+  "openssl": "OpenSSL 3.5.5 27 Jan 2026",
+  "hashlib_constructor": "<built-in function openssl_sha256>",
+  "lean_commit": "4310886800df03d5850ae5aed170c5611548f921",
+  "lean_core_sha256": "1b9adb0226d4bff4b59b6cbc8964de59dcf301c628ee6903b184ba6209bad296",
+  "binary_sha256": {
+    "bend": "b0830ec3e6e3e6250753dd3a801091d5889464437dd86b06a9e3c4487e0ceb60",
+    "go": "f4f400a2e1ad1f3b528546afeb35394e80cbdf2ada5c67f5c3963fe80c09b040",
+    "lean": "cca2ab49cc7d088739b8d64f5c748d1ff7798e4d2a02ee97be6cba2504f5b723"
+  },
+  "source_sha256": {
+    "packed.bend": "567d68f71be571b0377dad9dfc11063b7771846f2786160e495ec5cbbe2f324c",
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
+    "benchmarks/fourway/Bench.lean": "ab8b607ff4b0bcf4b8420299b2dbd23391fc2e68139faa4bcfb68c34f25d6082",
+    "benchmarks/fourway/hashlib_driver.py": "a029183e271026e2c005d0fce14040ee50d2efdda47dd9e53030e0529f8e7550",
+    "benchmarks/fourway/main.go": "9e4828d79d0739e4060e8d2874cae03ef134f49d0012f1bc0813a7308ac108d9"
+  },
+  "corpus_bytes": 33554432,
+  "corpus_sha256": "144a558bc1574119ec8332c517653121f4dd278b0680c8a12301bcecbb3d1b98",
+  "sequential": true,
+  "samples_per_workload": 5,
+  "warmups_per_workload": 1,
+  "timing": "In-process hashing, result allocation and retention; input loading/chunking/packing and output formatting excluded.",
+  "api_inputs": "Bend: packed U32 Array; Python: bytes; Go: byte slices; Lean: ByteArray. Prepared before timing.",
+  "acceleration": "Bend and Lean pure software; Go and Python use their standard default implementations, including available hardware acceleration.",
+  "timers": {
+    "bend": "IO.now milliseconds",
+    "hashlib": "perf_counter_ns",
+    "go": "time.Since nanoseconds",
+    "lean": "IO.monoNanosNow"
+  },
+  "caveat": "Shared hosts, no exclusive CPU reservation; compiler and OS differences affect cross-host comparisons.",
+  "rows": [
+    {
+      "message_bytes": 64,
+      "messages": 524288,
+      "samples_ms": {
+        "bend": [
+          427.0,
+          414.0,
+          333.0,
+          403.0,
+          335.0
+        ],
+        "hashlib": [
+          332.082691,
+          330.178812,
+          329.888963,
+          330.068589,
+          344.241297
+        ],
+        "go": [
+          82.37012,
+          80.624279,
+          113.571449,
+          115.402207,
+          113.854219
+        ],
+        "lean": [
+          5482.443493,
+          5244.659534,
+          5343.487451,
+          4822.124332,
+          5743.49937
+        ]
+      },
+      "median_ms": {
+        "bend": 403.0,
+        "hashlib": 330.178812,
+        "go": 113.571449,
+        "lean": 5343.487451
+      },
+      "us_per_hash": {
+        "bend": 0.7686614990234375,
+        "hashlib": 0.6297661056518554,
+        "go": 0.21662034797668459,
+        "lean": 10.191893484115601
+      },
+      "MiB_per_second": {
+        "bend": 79.40446650124069,
+        "hashlib": 96.91718195412248,
+        "go": 281.7609556077778,
+        "lean": 5.988598325240083
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 1024,
+      "messages": 32768,
+      "samples_ms": {
+        "bend": [
+          209.0,
+          217.0,
+          155.0,
+          223.0,
+          212.0
+        ],
+        "hashlib": [
+          52.395277,
+          50.927526,
+          51.403334,
+          50.831543,
+          50.828377
+        ],
+        "go": [
+          38.022981,
+          38.036654,
+          38.012684,
+          40.005985,
+          38.016579
+        ],
+        "lean": [
+          2699.105044,
+          3084.408094,
+          2718.826171,
+          2828.937976,
+          3092.104466
+        ]
+      },
+      "median_ms": {
+        "bend": 212.0,
+        "hashlib": 50.927526,
+        "go": 38.022981,
+        "lean": 2828.937976
+      },
+      "us_per_hash": {
+        "bend": 6.4697265625,
+        "hashlib": 1.5541847534179687,
+        "go": 1.1603692932128906,
+        "lean": 86.33233569335938
+      },
+      "MiB_per_second": {
+        "bend": 150.9433962264151,
+        "hashlib": 628.3438940269747,
+        "go": 841.5962967238155,
+        "lean": 11.311665462968778
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 16384,
+      "messages": 2048,
+      "samples_ms": {
+        "bend": [
+          202.0,
+          198.0,
+          198.0,
+          201.0,
+          193.0
+        ],
+        "hashlib": [
+          34.239511,
+          34.252134,
+          34.258531,
+          34.258699,
+          34.866914
+        ],
+        "go": [
+          33.292149,
+          33.506585,
+          24.114706,
+          33.250786,
+          33.246187
+        ],
+        "lean": [
+          2752.15001,
+          2704.697157,
+          2517.792673,
+          2986.22096,
+          2670.103052
+        ]
+      },
+      "median_ms": {
+        "bend": 198.0,
+        "hashlib": 34.258531,
+        "go": 33.250786,
+        "lean": 2704.697157
+      },
+      "us_per_hash": {
+        "bend": 96.6796875,
+        "hashlib": 16.727798339843748,
+        "go": 16.2357353515625,
+        "lean": 1320.6529086914063
+      },
+      "MiB_per_second": {
+        "bend": 161.6161616161616,
+        "hashlib": 934.0739099408554,
+        "go": 962.3832651655213,
+        "lean": 11.831269137537678
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 65536,
+      "messages": 512,
+      "samples_ms": {
+        "bend": [
+          201.0,
+          191.0,
+          182.0,
+          200.0,
+          143.0
+        ],
+        "hashlib": [
+          33.35273,
+          33.414201,
+          33.401978,
+          33.37635,
+          24.157237
+        ],
+        "go": [
+          23.898897,
+          32.997306,
+          32.989893,
+          34.007353,
+          32.996348
+        ],
+        "lean": [
+          2177.336598,
+          2774.924423,
+          2769.2196,
+          2534.513383,
+          2126.562079
+        ]
+      },
+      "median_ms": {
+        "bend": 191.0,
+        "hashlib": 33.37635,
+        "go": 32.996348,
+        "lean": 2534.513383
+      },
+      "us_per_hash": {
+        "bend": 373.046875,
+        "hashlib": 65.18818359375001,
+        "go": 64.4459921875,
+        "lean": 4950.221451171875
+      },
+      "MiB_per_second": {
+        "bend": 167.5392670157068,
+        "hashlib": 958.7627167140804,
+        "go": 969.8042947055839,
+        "lean": 12.625697782713187
+      },
+      "all_digests_match": true
+    }
+  ],
+  "cpu": "Intel Xeon Gold 5412U",
+  "bend_version": "2.0.16",
+  "bend_c_compiler": "GCC 15.2.0; -O3 -march=native",
+  "go_version": "go1.26.0 linux/amd64",
+  "lean_version": "4.29.1",
+  "lean_compile_command": ".> /srv/sha256-fourway/toolchain/lean-4.29.1-linux/bin/clang -c -o /srv/sha256-fourway/LeanSha256/.lake/build/ir/LeanSha256/Core.c.o.export /srv/sha256-fourway/LeanSha256/.lake/build/ir/LeanSha256/Core.c -I /srv/sha256-fourway/toolchain/lean-4.29.1-linux/include -fstack-clash-protection -fdata-sections -ffunction-sections -fPIC -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /srv/sha256-fourway/toolchain/lean-4.29.1-linux -nostdinc -isystem /srv/sha256-fourway/toolchain/lean-4.29.1-linux/include/clang -O3 -DNDEBUG -march=native -DLEAN_EXPORTING"
+}

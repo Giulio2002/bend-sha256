@@ -18,7 +18,12 @@
     "tools/benchmark_packed.py": "7c0381a2950e8a9a22c4f74d030743e0b5cb2b0d4178fa52fb4324d9208deb0e",
     "benchmarks/list_driver.bend": "2b4c5d4593b62e8a29f59dbb60aaed6d7f30d16810d22586e9e876aaebd0bf65",
     "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
-    "benchmarks/packed_input.bend": "1887a3752f6d49673014d9e00af1d888ced8abab238b34176b779146bc57b3d7"
+    "benchmarks/packed_input.bend": "1887a3752f6d49673014d9e00af1d888ced8abab238b34176b779146bc57b3d7",
+    "tools/benchmark_fourway.py": "229fba8a181dc216806ca82c778ab546572c623612bfe193586fd7ddf93f38a2",
+    "tools/build_fourway.py": "9a93e14816a7391dab1dfaab5c717b3aa7d3e6d678e2dd2d47c74e29ab4a4393",
+    "benchmarks/fourway/main.go": "9e4828d79d0739e4060e8d2874cae03ef134f49d0012f1bc0813a7308ac108d9",
+    "benchmarks/fourway/hashlib_driver.py": "a029183e271026e2c005d0fce14040ee50d2efdda47dd9e53030e0529f8e7550",
+    "benchmarks/fourway/Bench.lean": "ab8b607ff4b0bcf4b8420299b2dbd23391fc2e68139faa4bcfb68c34f25d6082"
   },
   "imports": {
     "core.bend": [

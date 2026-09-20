@@ -1,0 +1,256 @@
+{
+  "host": "macOS-15.6-arm64-arm-64bit",
+  "python": "3.12.12 (main, Feb  4 2026, 01:57:59) [Clang 21.1.4 ]",
+  "openssl": "OpenSSL 3.5.5 27 Jan 2026",
+  "hashlib_constructor": "<built-in function openssl_sha256>",
+  "lean_commit": "4310886800df03d5850ae5aed170c5611548f921",
+  "lean_core_sha256": "1b9adb0226d4bff4b59b6cbc8964de59dcf301c628ee6903b184ba6209bad296",
+  "binary_sha256": {
+    "bend": "6a536837a872a3f13da5fda46524fa38d77207d54c197ac0539c87ca068ec585",
+    "go": "9aa7edf11d6c17d57b2029dc37829c118470c65121395910857345d03a2df5b8",
+    "lean": "7d140f6b33fd93bce4db0e07c1333a7635721baeafeb9280b36fe238b91b15ba"
+  },
+  "source_sha256": {
+    "packed.bend": "567d68f71be571b0377dad9dfc11063b7771846f2786160e495ec5cbbe2f324c",
+    "core.bend": "ef5f953def72fd41776be1b477d8542ded7ee26b8d317f33714b9eccd9f36f40",
+    "benchmarks/packed_driver.bend": "0c1dd218ce2197f7ae31715a0e7be50508ce3a1f1323651915c1776c9f0024be",
+    "benchmarks/fourway/Bench.lean": "ab8b607ff4b0bcf4b8420299b2dbd23391fc2e68139faa4bcfb68c34f25d6082",
+    "benchmarks/fourway/hashlib_driver.py": "a029183e271026e2c005d0fce14040ee50d2efdda47dd9e53030e0529f8e7550",
+    "benchmarks/fourway/main.go": "9e4828d79d0739e4060e8d2874cae03ef134f49d0012f1bc0813a7308ac108d9"
+  },
+  "corpus_bytes": 33554432,
+  "corpus_sha256": "144a558bc1574119ec8332c517653121f4dd278b0680c8a12301bcecbb3d1b98",
+  "sequential": true,
+  "samples_per_workload": 5,
+  "warmups_per_workload": 1,
+  "timing": "In-process hashing, result allocation and retention; input loading/chunking/packing and output formatting excluded.",
+  "api_inputs": "Bend: packed U32 Array; Python: bytes; Go: byte slices; Lean: ByteArray. Prepared before timing.",
+  "acceleration": "Bend and Lean pure software; Go and Python use their standard default implementations, including available hardware acceleration.",
+  "timers": {
+    "bend": "IO.now milliseconds",
+    "hashlib": "perf_counter_ns",
+    "go": "time.Since nanoseconds",
+    "lean": "IO.monoNanosNow"
+  },
+  "caveat": "Shared hosts, no exclusive CPU reservation; compiler and OS differences affect cross-host comparisons.",
+  "rows": [
+    {
+      "message_bytes": 64,
+      "messages": 524288,
+      "samples_ms": {
+        "bend": [
+          143.0,
+          143.0,
+          150.0,
+          171.0,
+          178.0
+        ],
+        "hashlib": [
+          98.310917,
+          95.626416,
+          111.333541,
+          117.020459,
+          116.827125
+        ],
+        "go": [
+          24.619916,
+          25.374709,
+          24.569375,
+          30.306875,
+          30.06075
+        ],
+        "lean": [
+          2412.654875,
+          2414.735334,
+          2441.08625,
+          2912.240916,
+          3065.317208
+        ]
+      },
+      "median_ms": {
+        "bend": 150.0,
+        "hashlib": 111.333541,
+        "go": 25.374709,
+        "lean": 2441.08625
+      },
+      "us_per_hash": {
+        "bend": 0.286102294921875,
+        "hashlib": 0.2123518772125244,
+        "go": 0.04839841651916504,
+        "lean": 4.656002521514893
+      },
+      "MiB_per_second": {
+        "bend": 213.33333333333334,
+        "hashlib": 287.4246135762447,
+        "go": 1261.098206091743,
+        "lean": 13.1089182121279
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 1024,
+      "messages": 32768,
+      "samples_ms": {
+        "bend": [
+          91.0,
+          78.0,
+          79.0,
+          90.0,
+          78.0
+        ],
+        "hashlib": [
+          24.2465,
+          21.930625,
+          20.522459,
+          21.865667,
+          19.881167
+        ],
+        "go": [
+          17.227708,
+          14.844042,
+          15.093708,
+          15.308583,
+          14.417542
+        ],
+        "lean": [
+          1566.85375,
+          1483.595,
+          1492.693875,
+          1537.43925,
+          1474.071958
+        ]
+      },
+      "median_ms": {
+        "bend": 79.0,
+        "hashlib": 21.865667,
+        "go": 15.093708,
+        "lean": 1492.693875
+      },
+      "us_per_hash": {
+        "bend": 2.410888671875,
+        "hashlib": 0.6672872009277343,
+        "go": 0.46062341308593746,
+        "lean": 45.553401947021484
+      },
+      "MiB_per_second": {
+        "bend": 405.0632911392405,
+        "hashlib": 1463.481539346593,
+        "go": 2120.088715112284,
+        "lean": 21.437751260284365
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 16384,
+      "messages": 2048,
+      "samples_ms": {
+        "bend": [
+          72.0,
+          62.0,
+          59.0,
+          59.0,
+          60.0
+        ],
+        "hashlib": [
+          14.084042,
+          15.4295,
+          11.587792,
+          11.757208,
+          11.757959
+        ],
+        "go": [
+          13.6015,
+          15.36325,
+          11.635875,
+          11.558208,
+          11.480958
+        ],
+        "lean": [
+          1360.263291,
+          1330.317458,
+          1135.556166,
+          1123.800042,
+          1147.971167
+        ]
+      },
+      "median_ms": {
+        "bend": 60.0,
+        "hashlib": 11.757959,
+        "go": 11.635875,
+        "lean": 1147.971167
+      },
+      "us_per_hash": {
+        "bend": 29.296875,
+        "hashlib": 5.7411909179687495,
+        "go": 5.68157958984375,
+        "lean": 560.5327963867187
+      },
+      "MiB_per_second": {
+        "bend": 533.3333333333334,
+        "hashlib": 2721.5607742806383,
+        "go": 2750.115483365024,
+        "lean": 27.875264570995974
+      },
+      "all_digests_match": true
+    },
+    {
+      "message_bytes": 65536,
+      "messages": 512,
+      "samples_ms": {
+        "bend": [
+          60.0,
+          59.0,
+          61.0,
+          84.0,
+          81.0
+        ],
+        "hashlib": [
+          11.441,
+          11.518584,
+          11.441,
+          15.409958,
+          15.893875
+        ],
+        "go": [
+          11.446333,
+          11.418,
+          11.636375,
+          16.321208,
+          14.777417
+        ],
+        "lean": [
+          1106.564875,
+          1112.82275,
+          1138.96175,
+          1172.918417,
+          1434.521917
+        ]
+      },
+      "median_ms": {
+        "bend": 61.0,
+        "hashlib": 11.518584,
+        "go": 11.636375,
+        "lean": 1138.96175
+      },
+      "us_per_hash": {
+        "bend": 119.140625,
+        "hashlib": 22.497234375,
+        "go": 22.727294921875,
+        "lean": 2224.53466796875
+      },
+      "MiB_per_second": {
+        "bend": 524.5901639344262,
+        "hashlib": 2778.1192549361967,
+        "go": 2749.997314455748,
+        "lean": 28.095763532006234
+      },
+      "all_digests_match": true
+    }
+  ],
+  "cpu": "Apple M4",
+  "bend_version": "2.0.16",
+  "bend_c_compiler": "Apple Clang 17; -O3 -march=native",
+  "go_version": "go1.25.5 darwin/arm64",
+  "lean_version": "4.29.1",
+  "lean_compile_command": ".> /Users/monkeair/work/ssz-lean-toolchain/toolchains/leanprover--lean4---v4.29.1/bin/clang -c -o /Users/monkeair/work/sha256-fourway/LeanSha256/.lake/build/ir/LeanSha256/Core.c.o.export /Users/monkeair/work/sha256-fourway/LeanSha256/.lake/build/ir/LeanSha256/Core.c -I /Users/monkeair/work/ssz-lean-toolchain/toolchains/leanprover--lean4---v4.29.1/include -fstack-clash-protection -fdata-sections -ffunction-sections -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /Users/monkeair/work/ssz-lean-toolchain/toolchains/leanprover--lean4---v4.29.1 -nostdinc -isystem /Users/monkeair/work/ssz-lean-toolchain/toolchains/leanprover--lean4---v4.29.1/include/clang -O3 -DNDEBUG -march=native -DLEAN_EXPORTING"
+}
