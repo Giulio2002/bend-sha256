@@ -8,6 +8,43 @@ plus checked digest word-order and eight-word size laws.
 No crypto FFI, hardware SHA intrinsics, compiler fork, added axioms, or unsafe
 proof declarations are used. Checked with stock **Bend 2.0.16**.
 
+## BendHub
+
+Published package: [0xda83506fb9f059ead7afcfa2f498df5f](https://hub.bend-lang.com/0xda83506fb9f059ead7afcfa2f498df5f).
+
+Import the packed-array implementation directly:
+
+```bend
+import Base
+import 0xda83506fb9f059ead7afcfa2f498df5f/sha256.bend as SHA
+```
+
+The package includes the checked proof modules and specifications. To import the
+entry module that also checks those proofs, use:
+
+```bend
+import 0xda83506fb9f059ead7afcfa2f498df5f/package.bend as SHA
+```
+
+Both expose `SHA.sha256(words, byte_length)` and `SHA.hex(digest)`. Input and output
+words contain four **big-endian** bytes each; the digest has exactly eight words.
+The implementation-only import does not load the historical list proof models.
+
+BendHub packages are immutable and addressed by their content hash. This package
+contains the production and proof sources from release `c77b76c`, plus the package
+entry module. The published bundle contains 19 files (580,462 bytes); its scope
+and limitations are documented in `package.bend` and [CORRECTNESS.md](CORRECTNESS.md).
+A clean-cache download was checked on the interpreter and native backend.
+
+To publish a future checked release:
+
+```sh
+bend PROOF.bend
+bend package.bend --publish
+```
+
+A source change produces a new package hash; update the import line accordingly.
+
 ## API (breaking change: packed arrays only)
 
 The production API no longer accepts or returns linked lists:
