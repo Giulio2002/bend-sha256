@@ -1,7 +1,7 @@
 import Base
 import ./state.bend as S
 
-type Window is Data:
+type RoundWindow is Data:
   W{a: U32, b: U32, c: U32, d: U32, e: U32, f: U32, g: U32, h: U32,
     i: U32, j: U32, k: U32, l: U32, m: U32, n: U32, o: U32, p: U32}
 
@@ -54,10 +54,10 @@ def pack(a: U32, b: U32, c: U32, d: U32) -> U32:
     .|. U32.shln((b .&. 255 : U32), 16n)
     .|. U32.shln((c .&. 255 : U32), 8n) .|. (d .&. 255) : U32)
 
-def kr64(q: Nat, win: Window, s: S.State) -> S.State:
+def kr64(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   s
 
-def kr63(q: Nat, win: Window, s: S.State) -> S.State:
+def kr63(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -65,7 +65,7 @@ def kr63(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr64(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3329325298, w))
 
-def kr62(q: Nat, win: Window, s: S.State) -> S.State:
+def kr62(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -73,7 +73,7 @@ def kr62(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr63(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3204031479, w))
 
-def kr61(q: Nat, win: Window, s: S.State) -> S.State:
+def kr61(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -81,7 +81,7 @@ def kr61(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr62(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2756734187, w))
 
-def kr60(q: Nat, win: Window, s: S.State) -> S.State:
+def kr60(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -89,7 +89,7 @@ def kr60(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr61(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2428436474, w))
 
-def kr59(q: Nat, win: Window, s: S.State) -> S.State:
+def kr59(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -97,7 +97,7 @@ def kr59(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr60(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2361852424, w))
 
-def kr58(q: Nat, win: Window, s: S.State) -> S.State:
+def kr58(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -105,7 +105,7 @@ def kr58(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr59(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2227730452, w))
 
-def kr57(q: Nat, win: Window, s: S.State) -> S.State:
+def kr57(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -113,7 +113,7 @@ def kr57(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr58(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2024104815, w))
 
-def kr56(q: Nat, win: Window, s: S.State) -> S.State:
+def kr56(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -121,7 +121,7 @@ def kr56(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr57(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1955562222, w))
 
-def kr55(q: Nat, win: Window, s: S.State) -> S.State:
+def kr55(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -129,7 +129,7 @@ def kr55(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr56(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1747873779, w))
 
-def kr54(q: Nat, win: Window, s: S.State) -> S.State:
+def kr54(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -137,7 +137,7 @@ def kr54(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr55(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1537002063, w))
 
-def kr53(q: Nat, win: Window, s: S.State) -> S.State:
+def kr53(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -145,7 +145,7 @@ def kr53(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr54(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1322822218, w))
 
-def kr52(q: Nat, win: Window, s: S.State) -> S.State:
+def kr52(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -153,7 +153,7 @@ def kr52(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr53(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 958139571, w))
 
-def kr51(q: Nat, win: Window, s: S.State) -> S.State:
+def kr51(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -161,7 +161,7 @@ def kr51(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr52(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 883997877, w))
 
-def kr50(q: Nat, win: Window, s: S.State) -> S.State:
+def kr50(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -169,7 +169,7 @@ def kr50(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr51(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 659060556, w))
 
-def kr49(q: Nat, win: Window, s: S.State) -> S.State:
+def kr49(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -177,7 +177,7 @@ def kr49(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr50(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 506948616, w))
 
-def kr48(q: Nat, win: Window, s: S.State) -> S.State:
+def kr48(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -185,7 +185,7 @@ def kr48(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr49(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 430227734, w))
 
-def kr47(q: Nat, win: Window, s: S.State) -> S.State:
+def kr47(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -193,7 +193,7 @@ def kr47(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr48(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 275423344, w))
 
-def kr46(q: Nat, win: Window, s: S.State) -> S.State:
+def kr46(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -201,7 +201,7 @@ def kr46(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr47(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 4094571909, w))
 
-def kr45(q: Nat, win: Window, s: S.State) -> S.State:
+def kr45(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -209,7 +209,7 @@ def kr45(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr46(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3600352804, w))
 
-def kr44(q: Nat, win: Window, s: S.State) -> S.State:
+def kr44(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -217,7 +217,7 @@ def kr44(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr45(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3516065817, w))
 
-def kr43(q: Nat, win: Window, s: S.State) -> S.State:
+def kr43(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -225,7 +225,7 @@ def kr43(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr44(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3345764771, w))
 
-def kr42(q: Nat, win: Window, s: S.State) -> S.State:
+def kr42(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -233,7 +233,7 @@ def kr42(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr43(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3259730800, w))
 
-def kr41(q: Nat, win: Window, s: S.State) -> S.State:
+def kr41(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -241,7 +241,7 @@ def kr41(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr42(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2820302411, w))
 
-def kr40(q: Nat, win: Window, s: S.State) -> S.State:
+def kr40(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -249,7 +249,7 @@ def kr40(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr41(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2730485921, w))
 
-def kr39(q: Nat, win: Window, s: S.State) -> S.State:
+def kr39(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -257,7 +257,7 @@ def kr39(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr40(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2456956037, w))
 
-def kr38(q: Nat, win: Window, s: S.State) -> S.State:
+def kr38(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -265,7 +265,7 @@ def kr38(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr39(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2177026350, w))
 
-def kr37(q: Nat, win: Window, s: S.State) -> S.State:
+def kr37(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -273,7 +273,7 @@ def kr37(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr38(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1986661051, w))
 
-def kr36(q: Nat, win: Window, s: S.State) -> S.State:
+def kr36(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -281,7 +281,7 @@ def kr36(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr37(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1695183700, w))
 
-def kr35(q: Nat, win: Window, s: S.State) -> S.State:
+def kr35(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -289,7 +289,7 @@ def kr35(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr36(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1396182291, w))
 
-def kr34(q: Nat, win: Window, s: S.State) -> S.State:
+def kr34(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -297,7 +297,7 @@ def kr34(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr35(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1294757372, w))
 
-def kr33(q: Nat, win: Window, s: S.State) -> S.State:
+def kr33(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -305,7 +305,7 @@ def kr33(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr34(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 773529912, w))
 
-def kr32(q: Nat, win: Window, s: S.State) -> S.State:
+def kr32(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -313,7 +313,7 @@ def kr32(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr33(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 666307205, w))
 
-def kr31(q: Nat, win: Window, s: S.State) -> S.State:
+def kr31(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -321,7 +321,7 @@ def kr31(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr32(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 338241895, w))
 
-def kr30(q: Nat, win: Window, s: S.State) -> S.State:
+def kr30(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -329,7 +329,7 @@ def kr30(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr31(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 113926993, w))
 
-def kr29(q: Nat, win: Window, s: S.State) -> S.State:
+def kr29(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -337,7 +337,7 @@ def kr29(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr30(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3584528711, w))
 
-def kr28(q: Nat, win: Window, s: S.State) -> S.State:
+def kr28(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -345,7 +345,7 @@ def kr28(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr29(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3336571891, w))
 
-def kr27(q: Nat, win: Window, s: S.State) -> S.State:
+def kr27(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -353,7 +353,7 @@ def kr27(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr28(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 3210313671, w))
 
-def kr26(q: Nat, win: Window, s: S.State) -> S.State:
+def kr26(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -361,7 +361,7 @@ def kr26(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr27(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2952996808, w))
 
-def kr25(q: Nat, win: Window, s: S.State) -> S.State:
+def kr25(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -369,7 +369,7 @@ def kr25(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr26(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2821834349, w))
 
-def kr24(q: Nat, win: Window, s: S.State) -> S.State:
+def kr24(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -377,7 +377,7 @@ def kr24(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr25(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 2554220882, w))
 
-def kr23(q: Nat, win: Window, s: S.State) -> S.State:
+def kr23(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -385,7 +385,7 @@ def kr23(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr24(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1996064986, w))
 
-def kr22(q: Nat, win: Window, s: S.State) -> S.State:
+def kr22(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -393,7 +393,7 @@ def kr22(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr23(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1555081692, w))
 
-def kr21(q: Nat, win: Window, s: S.State) -> S.State:
+def kr21(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -401,7 +401,7 @@ def kr21(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr22(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 1249150122, w))
 
-def kr20(q: Nat, win: Window, s: S.State) -> S.State:
+def kr20(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -409,7 +409,7 @@ def kr20(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr21(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 770255983, w))
 
-def kr19(q: Nat, win: Window, s: S.State) -> S.State:
+def kr19(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -417,7 +417,7 @@ def kr19(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr20(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 604807628, w))
 
-def kr18(q: Nat, win: Window, s: S.State) -> S.State:
+def kr18(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -425,7 +425,7 @@ def kr18(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr19(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 264347078, w))
 
-def kr17(q: Nat, win: Window, s: S.State) -> S.State:
+def kr17(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
@@ -433,7 +433,7 @@ def kr17(q: Nat, win: Window, s: S.State) -> S.State:
       +w = (small1(b) + g + small0(t) + u : U32)
       kr18(z, W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, step(s, 4022224774, w))
 
-def kr16(q: Nat, win: Window, s: S.State) -> S.State:
+def kr16(q: Nat, win: RoundWindow, s: S.State) -> S.State:
   match q win:
     case 0n _:
       s
