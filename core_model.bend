@@ -80,7 +80,7 @@ def schedule_rounds(ws: List<&2, U32>, +extra: Nat, +history: List<&2, U32>, ks:
 
 # A fixed rolling window drops schedule words as soon as they are older than 16
 # rounds. This avoids growing and reference-counting the reverse history list.
-def window_rounds(n: Nat, win: Runtime.Window, ks: List<&2, U32>, s: S.State) -> S.State:
+def window_rounds(n: Nat, win: Runtime.RoundWindow, ks: List<&2, U32>, s: S.State) -> S.State:
   match n win ks:
     case 0n _ _:
       s
@@ -91,7 +91,7 @@ def window_rounds(n: Nat, win: Runtime.Window, ks: List<&2, U32>, s: S.State) ->
       window_rounds(q, Runtime.W{w, a, b, c, d, e, f, g, h, i, j, l, m, o, r, t}, kt,
         Runtime.step(s, k, w))
 
-def window_schedule_rounds(ws: List<&2, U32>, +extra: Nat, win: Runtime.Window, ks: List<&2, U32>, s: S.State) -> S.State:
+def window_schedule_rounds(ws: List<&2, U32>, +extra: Nat, win: Runtime.RoundWindow, ks: List<&2, U32>, s: S.State) -> S.State:
   match ws ks:
     case Nil{} _:
       window_rounds(extra, win, ks, s)
