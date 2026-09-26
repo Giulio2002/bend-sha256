@@ -25,7 +25,7 @@
     "benchmarks/fourway/hashlib_driver.py": "a029183e271026e2c005d0fce14040ee50d2efdda47dd9e53030e0529f8e7550",
     "benchmarks/fourway/Bench.lean": "ab8b607ff4b0bcf4b8420299b2dbd23391fc2e68139faa4bcfb68c34f25d6082",
     "legacy_model.bend": "596c955b4b65c2d59a5e0e76a919bfb7e5cf1ff78db32f85cc522f9b7e3bcd75",
-    "core_model.bend": "a77f248472b6b99cba28cb50f473244f5bfb89022b5b04aeef3858013798b031"
+    "core_model.bend": "86a391b9721e3fcc3c4ede6f172f4bd2713bde298871a4f366a306834381b72a"
   },
   "imports": {
     "core.bend": [
